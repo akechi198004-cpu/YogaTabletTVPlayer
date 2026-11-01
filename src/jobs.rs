@@ -40,6 +40,8 @@ pub enum JobEvent {
         outcome: PreflightOutcome,
     },
     Import {
+        /// 导入任务的有效性标识；清除源或开始新导入后旧任务自动失效。
+        token: u64,
         url: String,
         /// 成功时返回 (M3U 原文, 频道数)。
         result: Result<(String, usize), String>,
@@ -172,11 +174,17 @@ pub fn spawn_preflight(
 }
 
 /// 下载并解析自定义 M3U。真正的落盘由 UI 线程完成。
-pub fn spawn_import(client: Client, url: String, tx: Sender<JobEvent>, ctx: egui::Context) {
+pub fn spawn_import(
+    client: Client,
+    url: String,
+    token: u64,
+    tx: Sender<JobEvent>,
+    ctx: egui::Context,
+) {
     thread::spawn(move || {
         let result =
             net::download_m3u(&client, &url).map(|(text, channels)| (text, channels.len()));
-        let _ = tx.send(JobEvent::Import { url, result });
+        let _ = tx.send(JobEvent::Import { token, url, result });
         ctx.request_repaint();
     });
 }

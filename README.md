@@ -192,7 +192,7 @@ Output: `target\i686-pc-windows-msvc\release\touchiptv-desktop.exe`.
 - 在 `windows-latest` 上构建 `i686-pc-windows-msvc`
 - 静态链接 MSVC C 运行库
 - 产出可直接分发的 `.zip`：`touchiptv-desktop.exe`、`config.toml`、字体、`README.md`、截图、`LICENSE-RUST`
-- 提交信息以 `[deploy]` 开头时自动构建；也可 `workflow_dispatch` 手动触发
+- 推送到 `main` / `master`，且本次推送最后一条提交消息包含 `[deploy]` 时，才执行 Win32 测试、构建和 ZIP 打包；例如 `[deploy] 修复直播源导入`。普通提交跳过构建，不提供手动触发入口
 
 **English**  
 The repo includes `.github/workflows/windows-win32.yml`:
@@ -200,7 +200,7 @@ The repo includes `.github/workflows/windows-win32.yml`:
 - Builds `i686-pc-windows-msvc` on `windows-latest`
 - Statically links the MSVC C runtime
 - Uploads a ready-to-share `.zip`: `touchiptv-desktop.exe`, `config.toml`, the font, `README.md`, screenshots, and `LICENSE-RUST`
-- Auto-runs when the commit message starts with `[deploy]`; also supports `workflow_dispatch`
+- Runs Win32 tests, the release build, and ZIP packaging only when the latest commit message in a push to `main` / `master` contains `[deploy]`, for example `[deploy] Fix source import`. Ordinary commits skip the build; manual dispatch is disabled
 
 ---
 

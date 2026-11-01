@@ -10,7 +10,7 @@ use thiserror::Error;
 static TEMP_CONFIG_SEQ: AtomicU64 = AtomicU64::new(0);
 
 /// 用户可持久化的全部设置。
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppConfig {
     /// VLC 可执行文件路径。为空时启动时自动探测。

@@ -112,6 +112,9 @@ pub struct TouchIptvApp {
     pub(crate) settings_message: Option<(String, bool)>,
     pub(crate) import_message: Option<(String, bool)>,
     pub(crate) importing: bool,
+    /// 当前有效导入任务的有效性标识；清除源或开始新导入后旧任务失效。
+    import_seq: u64,
+    active_import: Option<u64>,
     pub(crate) confirm_clear_source: bool,
     pub(crate) custom_source_present: bool,
 
@@ -120,6 +123,9 @@ pub struct TouchIptvApp {
     pub(crate) job_tx: Sender<JobEvent>,
     pub(crate) job_rx: Receiver<JobEvent>,
     pub(crate) client: Client,
+    /// 仅测试使用：记录客户端成功替换的次数，便于验证失败时不替换。
+    #[cfg(test)]
+    pub(crate) client_generation: u64,
 
     pub(crate) play_seq: u64,
     pub(crate) batch_seq: u64,
@@ -131,7 +137,11 @@ pub struct TouchIptvApp {
 impl TouchIptvApp {
     pub fn new(cc: &eframe::CreationContext<'_>, paths: AppPaths) -> Self {
         theme::apply(&cc.egui_ctx);
+        Self::build(paths)
+    }
 
+    /// 不依赖 egui 窗口的构造逻辑，便于回归测试直接构造应用状态。
+    fn build(paths: AppPaths) -> Self {
         let (mut config, config_load_failed, config_error) =
             match AppConfig::load_or_default(&paths.config_file) {
                 Ok(config) => (config, false, None),
@@ -190,6 +200,8 @@ impl TouchIptvApp {
             settings_message: None,
             import_message: None,
             importing: false,
+            import_seq: 0,
+            active_import: None,
             confirm_clear_source: false,
             custom_source_present: custom_text.is_some(),
             speed_test_key: None,
@@ -197,6 +209,8 @@ impl TouchIptvApp {
             job_tx,
             job_rx,
             client,
+            #[cfg(test)]
+            client_generation: 0,
             play_seq: 0,
             batch_seq: 0,
             scroll_to_current: false,
@@ -1007,10 +1021,31 @@ impl TouchIptvApp {
 
     // ------------------------------------------------------------------ 设置与导入
 
+    /// 开始一次导入并返回有效性标识。旧任务的结果会因 token 不匹配被丢弃。
+    fn begin_import(&mut self) -> u64 {
+        self.import_seq = self.import_seq.wrapping_add(1);
+        let token = self.import_seq;
+        self.active_import = Some(token);
+        self.importing = true;
+        self.import_message = None;
+        self.settings_message = None;
+        token
+    }
+
+    /// 让当前在途导入失效，并同步 UI 的 importing 状态。
+    fn invalidate_import(&mut self) {
+        self.import_seq = self.import_seq.wrapping_add(1);
+        self.active_import = None;
+        self.importing = false;
+    }
+
     pub(crate) fn open_settings(&mut self) {
         self.settings = Some(SettingsDraft::from_config(&self.config));
         self.settings_message = None;
-        self.import_message = None;
+        // 导入进行中时保留进度状态；只有没有任务时才清掉旧结果。
+        if !self.importing {
+            self.import_message = None;
+        }
         self.confirm_clear_source = false;
     }
 
@@ -1048,10 +1083,14 @@ impl TouchIptvApp {
                         Some(("请输入以 http(s):// 开头的 M3U 地址".to_owned(), true));
                     return;
                 }
-                self.importing = true;
-                self.import_message = Some(("正在下载并解析直播源…".to_owned(), false));
-                self.settings_message = None;
-                jobs::spawn_import(self.client.clone(), url, self.job_tx.clone(), ctx.clone());
+                let token = self.begin_import();
+                jobs::spawn_import(
+                    self.client.clone(),
+                    url,
+                    token,
+                    self.job_tx.clone(),
+                    ctx.clone(),
+                );
             }
             SettingsAction::ClearSource => {
                 if self.config.custom_source_url.trim().is_empty() && !self.custom_source_present {
@@ -1061,6 +1100,9 @@ impl TouchIptvApp {
                 }
             }
             SettingsAction::ConfirmClear => {
+                // 先让所有在途导入失效，避免删除后又被迟到的下载结果恢复。
+                self.invalidate_import();
+                self.import_message = None;
                 if let Err(error) = channels::remove_custom_source(&self.custom_source_path) {
                     self.settings_message = Some((format!("删除自定义源失败：{error}"), true));
                     return;
@@ -1102,27 +1144,37 @@ impl TouchIptvApp {
             return;
         }
 
-        self.config.vlc_path = vlc_path;
-        self.config.fullscreen = draft.fullscreen;
-        self.config.use_playlist = draft.use_playlist;
-        self.config.network_caching_ms = draft.network_caching_ms.min(60_000);
-        self.config.disable_hw_decode = draft.disable_hw_decode;
-        self.config.ad_guard = draft.ad_guard;
-        self.config.auto_play_last = draft.auto_play_last;
-        self.config.user_agent = draft.user_agent.trim().to_owned();
-        self.config.referer = draft.referer.trim().to_owned();
+        // 先在候选配置上完成所有可能失败的步骤，全部成功后才替换运行状态。
+        let mut candidate = self.config.clone();
+        candidate.vlc_path = vlc_path;
+        candidate.fullscreen = draft.fullscreen;
+        candidate.use_playlist = draft.use_playlist;
+        candidate.network_caching_ms = draft.network_caching_ms.min(60_000);
+        candidate.disable_hw_decode = draft.disable_hw_decode;
+        candidate.ad_guard = draft.ad_guard;
+        candidate.auto_play_last = draft.auto_play_last;
+        candidate.user_agent = draft.user_agent.trim().to_owned();
+        candidate.referer = draft.referer.trim().to_owned();
+        candidate.normalize();
 
-        if let Err(error) = self.config.save(&self.config_path) {
-            self.settings_message = Some((format!("保存配置失败：{error}"), true));
-            return;
-        }
-
-        match net::build_client(&self.config.user_agent) {
-            Ok(client) => self.client = client,
+        let candidate_client = match net::build_client(&candidate.user_agent) {
+            Ok(client) => client,
             Err(error) => {
                 self.settings_message = Some((format!("重建 HTTP 客户端失败：{error}"), true));
                 return;
             }
+        };
+
+        if let Err(error) = candidate.save(&self.config_path) {
+            self.settings_message = Some((format!("保存配置失败：{error}"), true));
+            return;
+        }
+
+        self.config = candidate;
+        self.client = candidate_client;
+        #[cfg(test)]
+        {
+            self.client_generation = self.client_generation.wrapping_add(1);
         }
 
         self.config_load_failed = false;
@@ -1135,7 +1187,12 @@ impl TouchIptvApp {
         self.notice_error = false;
     }
 
-    fn handle_import(&mut self, url: String, result: Result<(String, usize), String>) {
+    fn handle_import(&mut self, token: u64, url: String, result: Result<(String, usize), String>) {
+        // 迟到结果：清除源或开始了新导入后，旧任务不能再改缓存/配置/频道。
+        if self.active_import != Some(token) {
+            return;
+        }
+        self.active_import = None;
         self.importing = false;
         match result {
             Ok((text, count)) => {
@@ -1254,7 +1311,7 @@ impl TouchIptvApp {
                 line_index,
                 outcome,
             } => self.handle_preflight(token, channel_key, line_index, outcome, ctx),
-            JobEvent::Import { url, result } => self.handle_import(url, result),
+            JobEvent::Import { token, url, result } => self.handle_import(token, url, result),
         }
     }
 
@@ -1411,5 +1468,268 @@ impl TouchIptvApp {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::sync::atomic::AtomicU64;
+
+    static TEST_SEQ: AtomicU64 = AtomicU64::new(0);
+
+    fn temp_dir(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "touchiptv-app-test-{name}-{}-{}",
+            std::process::id(),
+            TEST_SEQ.fetch_add(1, Ordering::Relaxed)
+        ));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("create temp dir");
+        dir
+    }
+
+    fn dummy_vlc(dir: &Path) -> PathBuf {
+        let path = dir.join("vlc.exe");
+        fs::write(&path, b"test").expect("write dummy vlc");
+        path
+    }
+
+    fn test_paths(dir: &Path, config_file: PathBuf) -> AppPaths {
+        AppPaths {
+            config_dir: dir.to_path_buf(),
+            config_file,
+            cache_dir: dir.join("cache"),
+        }
+    }
+
+    fn settings_draft(app: &TouchIptvApp, vlc: &Path) -> SettingsDraft {
+        let mut draft = SettingsDraft::from_config(&app.config);
+        draft.vlc_path = vlc.to_string_lossy().into_owned();
+        draft
+    }
+
+    #[test]
+    fn save_settings_keeps_state_when_config_save_fails() {
+        let dir = temp_dir("save-unwritable");
+        let blocker = dir.join("blocker");
+        fs::write(&blocker, b"not a directory").expect("write blocker");
+        let config_file = blocker.join("config.toml");
+        let vlc = dummy_vlc(&dir);
+
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file.clone()));
+        app.config.vlc_path = vlc.to_string_lossy().into_owned();
+        app.config.fullscreen = true;
+        app.config.user_agent = "old-agent".to_owned();
+
+        let original_config = app.config.clone();
+        let original_generation = app.client_generation;
+        let mut draft = settings_draft(&app, &vlc);
+        draft.fullscreen = false;
+        draft.user_agent = "new-agent".to_owned();
+        app.settings = Some(draft);
+
+        app.save_settings();
+
+        assert_eq!(app.config, original_config);
+        assert_eq!(app.client_generation, original_generation);
+        assert!(app.settings.is_some(), "draft must be kept on failure");
+        assert!(
+            app.settings_message
+                .as_ref()
+                .is_some_and(|(_, error)| *error),
+            "error message must be shown"
+        );
+        assert!(!config_file.exists(), "no config file may be written");
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn save_settings_keeps_state_when_client_build_fails() {
+        let dir = temp_dir("save-client");
+        let config_file = dir.join("config.toml");
+        let vlc = dummy_vlc(&dir);
+
+        let mut initial = AppConfig::default();
+        initial.vlc_path = vlc.to_string_lossy().into_owned();
+        initial.fullscreen = true;
+        initial.user_agent = "old-agent".to_owned();
+        initial.save(&config_file).expect("save initial config");
+        let disk_before = fs::read(&config_file).expect("read initial config");
+
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file.clone()));
+        let original_config = app.config.clone();
+        let original_generation = app.client_generation;
+        let mut draft = settings_draft(&app, &vlc);
+        draft.fullscreen = false;
+        // 换行符不是合法 HTTP HeaderValue，build_client 应失败。
+        draft.user_agent = "bad\nagent".to_owned();
+        app.settings = Some(draft);
+
+        app.save_settings();
+
+        assert_eq!(app.config, original_config);
+        assert_eq!(app.client_generation, original_generation);
+        assert_eq!(
+            fs::read(&config_file).expect("read config after failure"),
+            disk_before,
+            "disk config must stay unchanged"
+        );
+        assert!(app.settings.is_some(), "draft must be kept on failure");
+        assert!(
+            app.settings_message
+                .as_ref()
+                .is_some_and(|(_, error)| *error),
+            "error message must be shown"
+        );
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn save_settings_applies_candidate_only_after_all_success() {
+        let dir = temp_dir("save-success");
+        let config_file = dir.join("config.toml");
+        let vlc = dummy_vlc(&dir);
+
+        let mut initial = AppConfig::default();
+        initial.vlc_path = vlc.to_string_lossy().into_owned();
+        initial.fullscreen = true;
+        initial.user_agent = "old-agent".to_owned();
+        initial.save(&config_file).expect("save initial config");
+
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file.clone()));
+        let original_generation = app.client_generation;
+        let mut draft = settings_draft(&app, &vlc);
+        draft.fullscreen = false;
+        draft.user_agent = "new-agent".to_owned();
+        app.settings = Some(draft);
+
+        app.save_settings();
+
+        assert!(!app.config.fullscreen);
+        assert_eq!(app.config.user_agent, "new-agent");
+        assert_eq!(app.client_generation, original_generation + 1);
+        assert!(app.settings.is_none(), "settings close on success");
+        let loaded = AppConfig::load_or_default(&config_file).expect("load saved config");
+        assert_eq!(loaded, app.config);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn clearing_source_invalidates_in_flight_import() {
+        let dir = temp_dir("import-clear");
+        let config_file = dir.join("config.toml");
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file));
+
+        let old_text =
+            "#EXTM3U\n#EXTINF:-1 tvg-id=\"old\",Old Source\nhttp://old.example/old.m3u8\n";
+        channels::save_custom_source(&app.custom_source_path, old_text).expect("save old source");
+        app.config.custom_source_url = "http://old.example/list.m3u".to_owned();
+        app.reload_channels();
+        assert!(app
+            .channels
+            .iter()
+            .any(|channel| channel.name == "Old Source"));
+        app.settings = Some(SettingsDraft::from_config(&app.config));
+
+        let old_token = app.begin_import();
+        assert!(app.importing);
+        assert_eq!(app.active_import, Some(old_token));
+
+        app.apply_settings_action(SettingsAction::ConfirmClear, &egui::Context::default());
+
+        assert!(!app.importing, "clear must end importing state");
+        assert!(app.active_import.is_none());
+        assert!(!app.custom_source_path.exists(), "cache must be removed");
+        assert!(app.config.custom_source_url.is_empty());
+        assert!(
+            app.channels
+                .iter()
+                .all(|channel| channel.name != "Old Source"),
+            "channel list must fall back to bundled channels"
+        );
+        assert!(
+            app.settings
+                .as_ref()
+                .is_some_and(|draft| draft.source_input.is_empty()),
+            "draft source input must be cleared"
+        );
+
+        let late_text =
+            "#EXTM3U\n#EXTINF:-1 tvg-id=\"new\",New Source\nhttp://new.example/new.m3u8\n";
+        app.handle_import(
+            old_token,
+            "http://old.example/list.m3u".to_owned(),
+            Ok((late_text.to_owned(), 1)),
+        );
+
+        assert!(
+            !app.custom_source_path.exists(),
+            "late import must not recreate cache"
+        );
+        assert!(
+            app.config.custom_source_url.is_empty(),
+            "late import must not restore config url"
+        );
+        assert!(
+            app.channels
+                .iter()
+                .all(|channel| channel.name != "New Source"),
+            "late import must not restore channels"
+        );
+        assert!(!app.importing);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn stale_import_keeps_newer_import_state_and_result_is_discarded() {
+        let dir = temp_dir("import-stale");
+        let config_file = dir.join("config.toml");
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file));
+
+        let first_token = app.begin_import();
+        let second_token = app.begin_import();
+        assert_ne!(first_token, second_token);
+        assert!(app.importing);
+        assert_eq!(app.active_import, Some(second_token));
+
+        let first_text =
+            "#EXTM3U\n#EXTINF:-1 tvg-id=\"one\",One Source\nhttp://one.example/one.m3u8\n";
+        app.handle_import(
+            first_token,
+            "http://one.example/list.m3u".to_owned(),
+            Ok((first_text.to_owned(), 1)),
+        );
+
+        assert!(app.importing, "stale result must not end newer import");
+        assert_eq!(app.active_import, Some(second_token));
+        assert!(
+            app.channels
+                .iter()
+                .all(|channel| channel.name != "One Source"),
+            "stale result must be discarded"
+        );
+
+        let second_text =
+            "#EXTM3U\n#EXTINF:-1 tvg-id=\"two\",Two Source\nhttp://two.example/two.m3u8\n";
+        app.handle_import(
+            second_token,
+            "http://two.example/list.m3u".to_owned(),
+            Ok((second_text.to_owned(), 1)),
+        );
+
+        assert!(!app.importing);
+        assert!(app.active_import.is_none());
+        assert_eq!(app.config.custom_source_url, "http://two.example/list.m3u");
+        assert!(app
+            .channels
+            .iter()
+            .any(|channel| channel.name == "Two Source"));
+        assert_eq!(
+            fs::read_to_string(&app.custom_source_path).expect("read imported cache"),
+            second_text
+        );
+        let _ = fs::remove_dir_all(dir);
     }
 }

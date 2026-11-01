@@ -5,7 +5,9 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
@@ -16,7 +18,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[deploy]')
+    if: contains(github.event.head_commit.message, '[deploy]')
 
     steps:
       - name: Checkout repository
@@ -32,8 +34,11 @@ jobs:
         with:
           key: ${{ env.TARGET }}
 
+      - name: Test Win32 target
+        run: cargo test --locked --target $env:TARGET
+
       - name: Build release binary
-        run: cargo build --release --target $env:TARGET
+        run: cargo build --locked --release --target $env:TARGET
 
       - name: Prepare zip package
         shell: pwsh
@@ -53,3 +58,4 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }}
           path: dist/${{ env.PACKAGE_NAME }}.zip
+          if-no-files-found: error
