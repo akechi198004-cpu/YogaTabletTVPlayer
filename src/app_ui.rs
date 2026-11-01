@@ -1,8 +1,8 @@
 //! 界面绘制。布局尽量模拟 Android 版：
 //! 顶部标题栏、左侧/上方播放区、右侧/下方频道列表、底部状态条。
 //!
-//! 视频解码在外部 VLC 里，所以播放区是一块“正在播放”信息面板，而不是
-//! egui 自绘视频。这样低配平板只需要承担一个很轻的 UI 进程。
+//! 内置播放由随包 mpv 把画面渲染到应用窗口内的 Win32 子窗口；egui 只负责
+//! 定位这块画面和绘制控制层。外部 VLC 兼容模式仍只显示信息面板。
 
 use eframe::egui::{
     self, Align, Align2, Color32, FontId, Layout, Margin, Rect, RichText, Rounding, Sense, Stroke,
@@ -10,12 +10,17 @@ use eframe::egui::{
 };
 
 use crate::app::{SettingsAction, TouchIptvApp};
+use crate::config::PlayerBackend;
 use crate::models::LatencyState;
 use crate::ui::channel_list::{self, RowAction};
 use crate::ui::theme;
 
 impl TouchIptvApp {
     pub(crate) fn draw(&mut self, ctx: &egui::Context) {
+        if self.window_fullscreen {
+            self.draw_fullscreen(ctx);
+            return;
+        }
         self.draw_header(ctx);
         self.draw_notice(ctx);
 
@@ -57,6 +62,63 @@ impl TouchIptvApp {
             .show(ctx, |ui| self.draw_player_panel(ui, ctx));
 
         self.draw_settings(ctx);
+    }
+
+    fn draw_fullscreen(&mut self, ctx: &egui::Context) {
+        egui::CentralPanel::default()
+            .frame(
+                egui::Frame::none()
+                    .fill(theme::BG_ROOT)
+                    .inner_margin(Margin::same(6.0)),
+            )
+            .show(ctx, |ui| {
+                let bar_height = 44.0;
+                let spacing = ui.spacing().item_spacing.y;
+                let stage_height = (ui.available_height() - bar_height - spacing).max(120.0);
+                self.draw_stage_sized(ui, stage_height);
+                ui.add_space(4.0);
+                self.draw_fullscreen_bar(ui, ctx);
+            });
+    }
+
+    fn draw_fullscreen_bar(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
+        let paused = self.playback.as_ref().is_some_and(|state| state.paused);
+        ui.horizontal_wrapped(|ui| {
+            if ui
+                .add(bar_small_button(if paused { "继续" } else { "暂停" }))
+                .clicked()
+            {
+                self.toggle_embedded_pause();
+            }
+            if ui.add(bar_small_button("停止")).clicked() {
+                self.stop_playback(ctx);
+            }
+            if ui.add(bar_small_button("上一台")).clicked() {
+                self.step_channel(-1, ctx);
+            }
+            if ui.add(bar_small_button("下一台")).clicked() {
+                self.step_channel(1, ctx);
+            }
+            ui.label(
+                RichText::new("音量")
+                    .size(10.0)
+                    .color(theme::TEXT_SECONDARY),
+            );
+            let mut volume = self.config.embedded_volume;
+            let response = ui.add_sized(
+                [90.0, 24.0],
+                egui::Slider::new(&mut volume, 0..=100).show_value(false),
+            );
+            if response.changed() {
+                self.set_embedded_volume(volume);
+            }
+            if response.drag_stopped() {
+                self.persist_config(false);
+            }
+            if ui.add(bar_small_button("退出全屏")).clicked() {
+                self.toggle_window_fullscreen(ctx);
+            }
+        });
     }
 
     // ------------------------------------------------------------------ 顶栏
@@ -132,8 +194,17 @@ impl TouchIptvApp {
                     ));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if let Some(state) = &self.playback {
+                            let backend = if state.source.is_embedded() {
+                                if state.paused {
+                                    "内置 · 已暂停"
+                                } else {
+                                    "内置"
+                                }
+                            } else {
+                                "VLC"
+                            };
                             ui.label(
-                                RichText::new(format!("VLC · {}s", state.elapsed_secs()))
+                                RichText::new(format!("{backend} · {}s", state.elapsed_secs()))
                                     .size(10.0)
                                     .color(theme::TEXT_TERTIARY),
                             );
@@ -217,6 +288,12 @@ impl TouchIptvApp {
                             theme::BG_ELEVATED,
                         );
                     }
+                    if self.embedded_playing() {
+                        badge(ui, "内置", theme::TEXT_SECONDARY, theme::BG_ELEVATED);
+                        if self.playback.as_ref().is_some_and(|state| state.paused) {
+                            badge(ui, "已暂停", theme::AMBER, theme::BG_ELEVATED);
+                        }
+                    }
                 }
                 None => {
                     ui.label(
@@ -227,7 +304,10 @@ impl TouchIptvApp {
                     );
                     badge(
                         ui,
-                        "外部 VLC 播放",
+                        match self.config.player_backend {
+                            PlayerBackend::Embedded => "内置播放器",
+                            PlayerBackend::ExternalVlc => "外部 VLC",
+                        },
                         theme::TEXT_SECONDARY,
                         theme::BG_ELEVATED,
                     );
@@ -241,16 +321,31 @@ impl TouchIptvApp {
         let height = (width * 0.5)
             .clamp(120.0, 420.0)
             .min((viewport_height - 170.0).max(110.0));
-        let (rect, _) = ui.allocate_exact_size(Vec2::new(width, height), Sense::hover());
-        let painter = ui.painter();
+        self.draw_stage_sized(ui, height);
+    }
 
+    fn draw_stage_sized(&mut self, ui: &mut egui::Ui, height: f32) {
+        let width = ui.available_width();
+        let (rect, _) = ui.allocate_exact_size(Vec2::new(width, height), Sense::hover());
+
+        // 视频子窗口是 Win32 子窗口，必须每帧跟随 egui 播放区；设置窗口打开
+        // 或播放区被滚动裁切时隐藏，避免盖住标题栏和其他面板。
+        let clip = ui.clip_rect();
+        let fully_visible =
+            clip.contains(rect.min) && clip.contains(rect.max - Vec2::new(1.0, 1.0));
+        self.update_video_bounds(if fully_visible { Some(rect) } else { None }, ui.ctx());
+
+        let painter = ui.painter();
         painter.rect_filled(rect, Rounding::same(12.0), theme::BG_SCREEN);
         painter.rect_stroke(rect, Rounding::same(12.0), Stroke::new(1.0, theme::LINE));
+
+        let embedded = self.embedded_playing();
+        let backend_name = if embedded { "内置播放器" } else { "VLC" };
 
         // 窄窗口里播放区只剩一条窄带，隐藏次要说明，保证控制按钮可见。
         if height < 180.0 {
             let text = if let Some(state) = &self.playback {
-                format!("VLC 正在播放 · {}", state.channel_name)
+                format!("{backend_name} 正在播放 · {}", state.channel_name)
             } else if self.pending_preflight.is_some() {
                 "正在检查线路与广告特征…".to_owned()
             } else if let Some((title, _)) = &self.last_error {
@@ -282,6 +377,7 @@ impl TouchIptvApp {
         }
 
         if let Some(state) = &self.playback {
+            // 视频子窗口会覆盖这块区域；文字只在外部 VLC 模式或加载阶段可见。
             let dot = rect.left_top() + Vec2::new(22.0, 24.0);
             painter.circle_filled(dot, 4.0, theme::ROSE);
             painter.text(
@@ -292,56 +388,58 @@ impl TouchIptvApp {
                 theme::ROSE,
             );
 
-            painter.text(
-                rect.center() - Vec2::new(0.0, 42.0),
-                Align2::CENTER_CENTER,
-                "VLC 正在播放",
-                FontId::proportional(12.0),
-                theme::TEXT_SECONDARY,
-            );
-            painter.text(
-                rect.center() - Vec2::new(0.0, 8.0),
-                Align2::CENTER_CENTER,
-                &state.channel_name,
-                FontId::proportional(26.0),
-                theme::TEXT,
-            );
-            let line = self
-                .playing_channel()
-                .map(|channel| {
-                    format!(
-                        "线路 {}/{} · {}",
-                        state.line_index + 1,
-                        channel.line_count(),
-                        if channel.resolution.is_empty() {
-                            "画质未知"
-                        } else {
-                            channel.resolution.as_str()
-                        }
-                    )
-                })
-                .unwrap_or_else(|| format!("线路 {}", state.line_index + 1));
-            painter.text(
-                rect.center() + Vec2::new(0.0, 28.0),
-                Align2::CENTER_CENTER,
-                line,
-                FontId::proportional(12.0),
-                theme::TEXT_SECONDARY,
-            );
-            painter.text(
-                rect.left_bottom() + Vec2::new(22.0, -20.0),
-                Align2::LEFT_BOTTOM,
-                "播放控制请使用 VLC 窗口",
-                FontId::proportional(10.5),
-                theme::TEXT_TERTIARY,
-            );
-            painter.text(
-                rect.right_bottom() + Vec2::new(-22.0, -20.0),
-                Align2::RIGHT_BOTTOM,
-                "F 全屏 · 空格 暂停 · N/P 换台",
-                FontId::proportional(10.5),
-                theme::TEXT_TERTIARY,
-            );
+            if !embedded {
+                painter.text(
+                    rect.center() - Vec2::new(0.0, 42.0),
+                    Align2::CENTER_CENTER,
+                    "VLC 正在播放",
+                    FontId::proportional(12.0),
+                    theme::TEXT_SECONDARY,
+                );
+                painter.text(
+                    rect.center() - Vec2::new(0.0, 8.0),
+                    Align2::CENTER_CENTER,
+                    &state.channel_name,
+                    FontId::proportional(26.0),
+                    theme::TEXT,
+                );
+                let line = self
+                    .playing_channel()
+                    .map(|channel| {
+                        format!(
+                            "线路 {}/{} · {}",
+                            state.line_index + 1,
+                            channel.line_count(),
+                            if channel.resolution.is_empty() {
+                                "画质未知"
+                            } else {
+                                channel.resolution.as_str()
+                            }
+                        )
+                    })
+                    .unwrap_or_else(|| format!("线路 {}", state.line_index + 1));
+                painter.text(
+                    rect.center() + Vec2::new(0.0, 28.0),
+                    Align2::CENTER_CENTER,
+                    line,
+                    FontId::proportional(12.0),
+                    theme::TEXT_SECONDARY,
+                );
+                painter.text(
+                    rect.left_bottom() + Vec2::new(22.0, -20.0),
+                    Align2::LEFT_BOTTOM,
+                    "播放控制请使用 VLC 窗口",
+                    FontId::proportional(10.5),
+                    theme::TEXT_TERTIARY,
+                );
+                painter.text(
+                    rect.right_bottom() + Vec2::new(-22.0, -20.0),
+                    Align2::RIGHT_BOTTOM,
+                    "F 全屏 · 空格 暂停 · N/P 换台",
+                    FontId::proportional(10.5),
+                    theme::TEXT_TERTIARY,
+                );
+            }
         } else if self.pending_preflight.is_some() {
             painter.text(
                 rect.center() - Vec2::new(0.0, 12.0),
@@ -381,7 +479,7 @@ impl TouchIptvApp {
             painter.text(
                 rect.left_bottom() + Vec2::new(28.0, -22.0),
                 Align2::LEFT_BOTTOM,
-                "可点击下方「重新连接」，或换一个频道",
+                "可点击下方「重新连接」或「改用 VLC 播放」，也可以换一个频道",
                 FontId::proportional(10.5),
                 theme::TEXT_TERTIARY,
             );
@@ -399,7 +497,10 @@ impl TouchIptvApp {
             painter.text(
                 rect.center() + Vec2::new(0.0, 36.0),
                 Align2::CENTER_CENTER,
-                "点击频道列表即可调用 VLC 播放",
+                match self.config.player_backend {
+                    PlayerBackend::Embedded => "点击频道列表即可使用内置播放器",
+                    PlayerBackend::ExternalVlc => "点击频道列表即可调用 VLC 播放",
+                },
                 FontId::proportional(11.0),
                 theme::TEXT_TERTIARY,
             );
@@ -431,6 +532,9 @@ impl TouchIptvApp {
         let playing = self.playback.is_some();
         let pending = self.pending_preflight.is_some();
         let batch_running = self.batch.is_some();
+        let embedded = self.embedded_playing();
+        let paused = self.playback.as_ref().is_some_and(|state| state.paused);
+        let has_fallback = self.vlc_fallback.is_some();
         let vlc_ready = self.vlc_ready();
         let favorite = selected
             .as_ref()
@@ -444,12 +548,35 @@ impl TouchIptvApp {
         ui.horizontal_wrapped(|ui| {
             if playing || pending {
                 if ui.add(primary_button("停止")).clicked() {
-                    self.stop_playback();
+                    self.stop_playback(ctx);
                 }
             } else if selected.is_some() && ui.add(primary_button("开始播放")).clicked() {
                 if let Some(key) = key.clone() {
                     self.play_channel(key, ctx);
                 }
+            }
+
+            if embedded {
+                if ui
+                    .add(bar_button(if paused { "继续" } else { "暂停" }))
+                    .clicked()
+                {
+                    self.toggle_embedded_pause();
+                }
+                if ui
+                    .add(bar_button(if self.window_fullscreen {
+                        "退出全屏"
+                    } else {
+                        "全屏"
+                    }))
+                    .clicked()
+                {
+                    self.toggle_window_fullscreen(ctx);
+                }
+            }
+
+            if has_fallback && ui.add(primary_button("改用 VLC 播放")).clicked() {
+                self.use_vlc_fallback();
             }
 
             if selected.is_some() {
@@ -483,7 +610,10 @@ impl TouchIptvApp {
                 }
             }
 
-            if !vlc_ready && ui.add(bar_button("设置 VLC")).clicked() {
+            if !vlc_ready
+                && (self.config.player_backend == PlayerBackend::ExternalVlc || has_fallback)
+                && ui.add(bar_button("设置 VLC")).clicked()
+            {
                 self.open_settings();
             }
 
@@ -495,14 +625,41 @@ impl TouchIptvApp {
                 );
             }
         });
+
+        if embedded {
+            ui.horizontal_wrapped(|ui| {
+                ui.label(
+                    RichText::new("音量")
+                        .size(11.0)
+                        .color(theme::TEXT_SECONDARY),
+                );
+                let mut volume = self.config.embedded_volume;
+                let response = ui.add(
+                    egui::Slider::new(&mut volume, 0..=100)
+                        .show_value(true)
+                        .suffix("%"),
+                );
+                if response.changed() {
+                    self.set_embedded_volume(volume);
+                }
+                if response.drag_stopped() {
+                    self.persist_config(false);
+                }
+                ui.label(
+                    RichText::new("空格暂停 · F 全屏 · N/P 换台")
+                        .size(10.0)
+                        .color(theme::TEXT_TERTIARY),
+                );
+            });
+        }
     }
 
     fn draw_player_hints(&mut self, ui: &mut egui::Ui) {
-        if !self.vlc_ready() {
+        if self.config.player_backend == PlayerBackend::Embedded && !self.embedded_ready() {
             ui.add(
                 egui::Label::new(
                     RichText::new(
-                        "未检测到 VLC：请安装 VLC 3.x，或在设置中填写 vlc.exe 的完整路径。",
+                        "当前发布包缺少内置播放器运行时（mpv/mpv.exe）。请使用包含 mpv 文件夹的完整压缩包，或改用外部 VLC 兼容模式。",
                     )
                     .size(11.0)
                     .color(theme::AMBER),
@@ -510,23 +667,71 @@ impl TouchIptvApp {
                 .wrap(true),
             );
         }
-        ui.add(
-            egui::Label::new(
-                RichText::new("播放控制使用 VLC：空格 暂停 · F 全屏 · N/P 切换播放列表 · Q 退出。")
-                    .size(10.5)
-                    .color(theme::TEXT_TERTIARY),
-            )
-            .wrap(true),
-        );
-        if self.config.use_playlist {
+        if self.config.player_backend == PlayerBackend::ExternalVlc && !self.vlc_ready() {
             ui.add(
                 egui::Label::new(
-                    RichText::new("当前分类已写入 VLC 播放列表，可直接在 VLC 里换台。")
-                        .size(10.5)
-                        .color(theme::TEXT_TERTIARY),
+                    RichText::new(
+                        "未检测到 VLC：请在设置中点击「选择安装目录」定位 VLC，或填写 vlc.exe 的完整路径。",
+                    )
+                    .size(11.0)
+                    .color(theme::AMBER),
                 )
                 .wrap(true),
             );
+        }
+        if self.vlc_fallback.is_some() {
+            ui.add(
+                egui::Label::new(
+                    RichText::new(
+                        "内置播放失败，已保留当前线路。不会自动启动外部 VLC；需要兼容播放时请点击「改用 VLC 播放」。",
+                    )
+                    .size(11.0)
+                    .color(theme::AMBER),
+                )
+                .wrap(true),
+            );
+        } else if self.config.player_backend == PlayerBackend::Embedded {
+            ui.add(
+                egui::Label::new(
+                    RichText::new(
+                        "内置播放：空格 暂停 · F 全屏 · N/P 换台 · Esc 停止。画面由随包 mpv（FFmpeg）解码，不需要外部 VLC。",
+                    )
+                    .size(10.5)
+                    .color(theme::TEXT_TERTIARY),
+                )
+                .wrap(true),
+            );
+            ui.add(
+                egui::Label::new(
+                    RichText::new(
+                        "支持 HTTP(S) HLS（m3u8）、HTTP-FLV、MPEG-TS；不支持 DRM/加密流、网页地址和 mpv 不支持的编码。",
+                    )
+                    .size(10.0)
+                    .color(theme::TEXT_TERTIARY),
+                )
+                .wrap(true),
+            );
+        } else {
+            ui.add(
+                egui::Label::new(
+                    RichText::new(
+                        "外部 VLC 兼容模式：空格 暂停 · F 全屏 · N/P 切换播放列表 · Q 退出。",
+                    )
+                    .size(10.5)
+                    .color(theme::TEXT_TERTIARY),
+                )
+                .wrap(true),
+            );
+            if self.config.use_playlist {
+                ui.add(
+                    egui::Label::new(
+                        RichText::new("当前分类已写入 VLC 播放列表，可直接在 VLC 里换台。")
+                            .size(10.5)
+                            .color(theme::TEXT_TERTIARY),
+                    )
+                    .wrap(true),
+                );
+            }
         }
         if let Some(channel) = self.playing_channel().or_else(|| self.selected_channel()) {
             let line_index = self
@@ -726,20 +931,21 @@ impl TouchIptvApp {
         let import_message = self.import_message.clone();
         let settings_message = self.settings_message.clone();
         let confirm_clear = self.confirm_clear_source;
+        let embedded_available = crate::embedded::available();
         let screen = ctx.screen_rect();
-        let window_width = (screen.width() - 40.0).clamp(340.0, 640.0);
-        let max_height = (screen.height() - 280.0).max(240.0);
+        // fixed_size 同时锁定 min/max；窗口宽度不会随内容逐帧增长。
+        let window_width = (screen.width() - 32.0).clamp(320.0, 640.0);
+        let window_height = (screen.height() - 32.0).clamp(320.0, 720.0);
 
         egui::Window::new("设置")
             .collapsible(false)
             .resizable(false)
-            .default_width(window_width)
-            .max_height(screen.height() - 30.0)
+            .fixed_size(Vec2::new(window_width, window_height))
             .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
             .open(&mut open)
             .show(ctx, |ui| {
-                // 保存/取消放在顶部，内容再长也不会被挤出屏幕。
-                ui.horizontal(|ui| {
+                // 顶部按钮固定可见；内容在下方独立滚动。
+                ui.horizontal_wrapped(|ui| {
                     if ui.add(primary_button("保存并关闭")).clicked() {
                         action = Some(SettingsAction::Save);
                     }
@@ -752,9 +958,9 @@ impl TouchIptvApp {
                 if config_load_failed {
                     message_label(
                         ui,
-                        config_error
-                            .as_deref()
-                            .unwrap_or("配置文件读取失败，当前使用默认值。保存后会覆盖原文件。"),
+                        config_error.as_deref().unwrap_or(
+                            "配置文件读取失败，当前使用默认值。保存后会覆盖原文件。",
+                        ),
                         true,
                     );
                 }
@@ -764,34 +970,73 @@ impl TouchIptvApp {
                 ui.separator();
 
                 egui::ScrollArea::vertical()
-                    .max_height(max_height)
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
-                        section_title(ui, "播放");
-                        ui.horizontal(|ui| {
-                            ui.label("VLC 路径");
-                            let field_width = (ui.available_width() - 88.0).max(120.0);
-                            ui.add_sized(
-                                [field_width, 30.0],
-                                egui::TextEdit::singleline(&mut draft.vlc_path)
-                                    .hint_text("例如 C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"),
+                        section_title(ui, "播放后端");
+                        ui.radio_value(
+                            &mut draft.player_backend,
+                            PlayerBackend::Embedded,
+                            "内置播放器（推荐，默认）",
+                        );
+                        ui.radio_value(
+                            &mut draft.player_backend,
+                            PlayerBackend::ExternalVlc,
+                            "外部 VLC（兼容模式）",
+                        );
+                        if draft.player_backend == PlayerBackend::Embedded && !embedded_available {
+                            message_label(
+                                ui,
+                                "当前发布包缺少内置播放器运行时（mpv/mpv.exe），内置播放将不可用；不会自动启动外部 VLC，可手动改用兼容模式。",
+                                true,
                             );
-                            if ui.button("自动检测").clicked() {
-                                action = Some(SettingsAction::AutoDetect);
-                            }
-                        });
-                        ui.checkbox(&mut draft.fullscreen, "VLC 全屏播放");
+                        }
+                        ui.add(
+                            egui::Label::new(
+                                RichText::new(
+                                    "内置播放器使用随包 mpv（FFmpeg）解码，不需要安装 VLC；只有外部兼容模式才需要下面的 VLC 路径。",
+                                )
+                                .size(10.0)
+                                .color(theme::TEXT_TERTIARY),
+                            )
+                            .wrap(true),
+                        );
+
+                        section_title(ui, "播放");
+                        if let Some(index) = labeled_singleline_with_buttons(
+                            ui,
+                            "VLC 路径（兼容模式）",
+                            &mut draft.vlc_path,
+                            "例如 C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+                            &[("浏览", true), ("选择安装目录", true), ("自动检测", true)],
+                        ) {
+                            action = Some(match index {
+                                0 => SettingsAction::BrowseVlc,
+                                1 => SettingsAction::BrowseVlcFolder,
+                                _ => SettingsAction::AutoDetect,
+                            });
+                        }
+                        ui.add(
+                            egui::Label::new(
+                                RichText::new(
+                                    "「浏览」直接选择 vlc.exe；「选择安装目录」会自动查找。取消选择时保持当前值不变。",
+                                )
+                                .size(10.0)
+                                .color(theme::TEXT_TERTIARY),
+                            )
+                            .wrap(true),
+                        );
+                        ui.checkbox(&mut draft.fullscreen, "外部 VLC 全屏播放");
                         ui.checkbox(
                             &mut draft.use_playlist,
-                            "把当前分类写入 VLC 播放列表（可在 VLC 里用 N/P 换台）",
+                            "外部 VLC 使用播放列表（N/P 换台）",
                         );
                         ui.checkbox(
                             &mut draft.disable_hw_decode,
-                            "禁用硬件解码（花屏 / 绿屏时勾选）",
+                            "禁用硬件解码（花屏/绿屏）",
                         );
                         ui.checkbox(&mut draft.ad_guard, "启动前检查已知广告特征");
-                        ui.checkbox(&mut draft.auto_play_last, "启动程序时自动播放上次频道");
-                        ui.horizontal(|ui| {
+                        ui.checkbox(&mut draft.auto_play_last, "启动时自动播放上次频道");
+                        ui.horizontal_wrapped(|ui| {
                             ui.label("网络缓存");
                             ui.add(
                                 egui::DragValue::new(&mut draft.network_caching_ms)
@@ -799,38 +1044,38 @@ impl TouchIptvApp {
                                     .suffix(" ms")
                                     .speed(100.0),
                             );
-                            ui.label(
-                                RichText::new("低配平板建议 1500-3000")
-                                    .size(10.0)
-                                    .color(theme::TEXT_TERTIARY),
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new("低配平板建议 1500-3000")
+                                        .size(10.0)
+                                        .color(theme::TEXT_TERTIARY),
+                                )
+                                .wrap(true),
                             );
                         });
 
                         ui.collapsing("高级网络选项", |ui| {
-                            ui.horizontal(|ui| {
-                                ui.label("User-Agent");
-                                let width = (ui.available_width() - 4.0).max(100.0);
-                                ui.add_sized(
-                                    [width, 28.0],
-                                    egui::TextEdit::singleline(&mut draft.user_agent)
-                                        .hint_text("留空使用 VLC 默认值"),
-                                );
-                            });
-                            ui.horizontal(|ui| {
-                                ui.label("Referer");
-                                let width = (ui.available_width() - 4.0).max(100.0);
-                                ui.add_sized(
-                                    [width, 28.0],
-                                    egui::TextEdit::singleline(&mut draft.referer)
-                                        .hint_text("留空不使用"),
-                                );
-                            });
-                            ui.label(
-                                RichText::new(
-                                    "提示：VLC 3.0 对完整浏览器 UA 的支持不稳定；留空通常最稳。",
+                            labeled_singleline(
+                                ui,
+                                "User-Agent",
+                                &mut draft.user_agent,
+                                "留空使用默认值",
+                            );
+                            labeled_singleline(
+                                ui,
+                                "Referer",
+                                &mut draft.referer,
+                                "留空不使用",
+                            );
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(
+                                        "提示：VLC 3.0 对完整浏览器 UA 的支持不稳定；留空通常最稳。",
+                                    )
+                                    .size(10.0)
+                                    .color(theme::TEXT_TERTIARY),
                                 )
-                                .size(10.0)
-                                .color(theme::TEXT_TERTIARY),
+                                .wrap(true),
                             );
                         });
 
@@ -860,18 +1105,16 @@ impl TouchIptvApp {
                             );
                         }
 
-                        ui.horizontal(|ui| {
-                            let button_width = 64.0;
-                            let width = (ui.available_width() - button_width - 6.0).max(120.0);
-                            ui.add_sized(
-                                [width, 30.0],
-                                egui::TextEdit::singleline(&mut draft.source_input)
-                                    .hint_text("http(s)://…/playlist.m3u"),
-                            );
-                            if ui.add_enabled(!importing, bar_button("导入")).clicked() {
+                        if let Some(index) = singleline_with_buttons(
+                            ui,
+                            &mut draft.source_input,
+                            "http(s)://…/playlist.m3u",
+                            &[("导入", !importing)],
+                        ) {
+                            if index == 0 {
                                 action = Some(SettingsAction::Import);
                             }
-                        });
+                        }
                         if importing {
                             message_label(ui, "正在下载并解析直播源…", false);
                         }
@@ -880,7 +1123,7 @@ impl TouchIptvApp {
                         }
 
                         if confirm_clear {
-                            ui.horizontal(|ui| {
+                            ui.horizontal_wrapped(|ui| {
                                 ui.label(
                                     RichText::new("确定清除自定义源？")
                                         .size(11.0)
@@ -902,9 +1145,9 @@ impl TouchIptvApp {
                         ui.add(
                             egui::Label::new(
                                 RichText::new(format!(
-                                    "TouchIPTV Desktop {} · Rust + egui + 外部 VLC\n\
+                                    "TouchIPTV Desktop {} · Rust + egui + 内置播放器 / 外部 VLC\n\
                                      为 Win32 低性能平板重写：主程序只负责频道浏览、测速和\n\
-                                     广告预检，视频解码交给 VLC。支持 HLS / TS / FLV。",
+                                     广告预检，视频解码交给内置播放器或 VLC。",
                                     env!("CARGO_PKG_VERSION")
                                 ))
                                 .size(10.5)
@@ -915,8 +1158,9 @@ impl TouchIptvApp {
                         ui.add(
                             egui::Label::new(
                                 RichText::new(
-                                    "限制：外部 VLC 无法拦截播放中途才插入的广告；\
-                                     HTTPS 播放中的清单内容也不可拦截。",
+                                    "限制：内置 mpv 支持 HTTP(S) HLS、HTTP-FLV、MPEG-TS 等常见直播流；\
+                                     不支持 DRM/加密流、网页地址或 mpv 不支持的编码。\
+                                     外部 VLC 无法拦截播放中途才插入的广告，HTTPS 清单内容也无法拦截。",
                                 )
                                 .size(10.0)
                                 .color(theme::TEXT_TERTIARY),
@@ -926,8 +1170,8 @@ impl TouchIptvApp {
                     });
             });
 
-        // 把本帧编辑结果写回草稿，再执行动作。否则 AutoDetect/Import 等
-        // 动作会读到上一帧的旧值。
+        // 把本帧编辑结果写回草稿，再执行动作。否则 Browse/AutoDetect/Import
+        // 等动作会读到上一帧的旧值。
         if self.settings.is_some() {
             self.settings = Some(draft);
         }
@@ -938,6 +1182,16 @@ impl TouchIptvApp {
             self.settings = None;
             self.confirm_clear_source = false;
         }
+    }
+}
+
+// ---------------------------------------------------------------------- 测试辅助
+
+#[cfg(test)]
+impl TouchIptvApp {
+    /// 只给布局回归测试使用：直接绘制设置窗口，不依赖真实窗口后端。
+    pub(crate) fn draw_settings_for_test(&mut self, ctx: &egui::Context) {
+        self.draw_settings(ctx);
     }
 }
 
@@ -1011,12 +1265,150 @@ fn latency_text(latency: LatencyState) -> String {
     }
 }
 
+/// 控件实际尺寸与布局预算共用同一组常量，避免“预留 64、实际 66”
+/// 这类正反馈扩宽。
+const BAR_BUTTON_MIN_WIDTH: f32 = 66.0;
+const BAR_BUTTON_HEIGHT: f32 = 32.0;
+const BAR_BUTTON_FONT_SIZE: f32 = 12.5;
+const SMALL_BUTTON_MIN_WIDTH: f32 = 54.0;
+const SMALL_BUTTON_HEIGHT: f32 = 26.0;
+const PRIMARY_BUTTON_MIN_WIDTH: f32 = 86.0;
+const SETTINGS_INPUT_HEIGHT: f32 = 30.0;
+const MIN_SETTINGS_INPUT_WIDTH: f32 = 120.0;
+
+fn text_width(ui: &egui::Ui, text: &str, size: f32) -> f32 {
+    let font = FontId::proportional(size);
+    ui.fonts(|fonts| {
+        fonts
+            .layout_no_wrap(text.to_owned(), font, Color32::WHITE)
+            .size()
+            .x
+    })
+}
+
+fn bar_button_width(ui: &egui::Ui, text: &str) -> f32 {
+    (text_width(ui, text, BAR_BUTTON_FONT_SIZE) + ui.spacing().button_padding.x * 2.0)
+        .max(BAR_BUTTON_MIN_WIDTH)
+}
+
+/// 标签 + 单行输入框。宽度不足时标签和输入框上下换行，输入框始终取
+/// 当前可用宽度，长文本在输入框内部水平滚动。
+fn labeled_singleline(ui: &mut egui::Ui, label: &str, value: &mut String, hint: &str) {
+    let spacing = ui.spacing().item_spacing.x;
+    let label_width = text_width(ui, label, 14.0);
+    if ui.available_width() >= label_width + spacing + MIN_SETTINGS_INPUT_WIDTH {
+        ui.horizontal(|ui| {
+            ui.label(label);
+            let width = ui.available_width();
+            ui.add_sized(
+                [width, SETTINGS_INPUT_HEIGHT],
+                egui::TextEdit::singleline(value).hint_text(hint),
+            );
+        });
+    } else {
+        ui.vertical(|ui| {
+            ui.label(label);
+            let width = ui.available_width();
+            ui.add_sized(
+                [width, SETTINGS_INPUT_HEIGHT],
+                egui::TextEdit::singleline(value).hint_text(hint),
+            );
+        });
+    }
+}
+
+/// 单行输入框 + 尾部按钮。先按实际按钮宽度预留，再把剩余宽度给输入框。
+/// 空间不足时输入框独占一行，按钮换到下一行。
+fn singleline_with_buttons(
+    ui: &mut egui::Ui,
+    value: &mut String,
+    hint: &str,
+    buttons: &[(&str, bool)],
+) -> Option<usize> {
+    let spacing = ui.spacing().item_spacing.x;
+    let buttons_width: f32 = buttons
+        .iter()
+        .map(|(text, _)| bar_button_width(ui, text))
+        .sum::<f32>()
+        + spacing * buttons.len().saturating_sub(1) as f32;
+    let mut clicked = None;
+
+    if ui.available_width() >= MIN_SETTINGS_INPUT_WIDTH + spacing + buttons_width {
+        ui.horizontal(|ui| {
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                // 从右往左先放按钮，再放输入框：视觉顺序仍是 输入框 [按钮...]。
+                for (index, (text, enabled)) in buttons.iter().enumerate().rev() {
+                    if ui.add_enabled(*enabled, bar_button(text)).clicked() {
+                        clicked = Some(index);
+                    }
+                }
+                let width = ui.available_width();
+                ui.add_sized(
+                    [width, SETTINGS_INPUT_HEIGHT],
+                    egui::TextEdit::singleline(value).hint_text(hint),
+                );
+            });
+        });
+    } else {
+        ui.add_sized(
+            [ui.available_width(), SETTINGS_INPUT_HEIGHT],
+            egui::TextEdit::singleline(value).hint_text(hint),
+        );
+        ui.horizontal_wrapped(|ui| {
+            for (index, (text, enabled)) in buttons.iter().enumerate() {
+                if ui.add_enabled(*enabled, bar_button(text)).clicked() {
+                    clicked = Some(index);
+                }
+            }
+        });
+    }
+
+    clicked
+}
+
+/// 标签 + 输入框 + 尾部按钮。先判断整行能否放下，放不下时标签单独
+/// 一行，再由 `singleline_with_buttons` 决定输入框与按钮是否再换行。
+fn labeled_singleline_with_buttons(
+    ui: &mut egui::Ui,
+    label: &str,
+    value: &mut String,
+    hint: &str,
+    buttons: &[(&str, bool)],
+) -> Option<usize> {
+    let spacing = ui.spacing().item_spacing.x;
+    let label_width = text_width(ui, label, 14.0);
+    let buttons_width: f32 = buttons
+        .iter()
+        .map(|(text, _)| bar_button_width(ui, text))
+        .sum::<f32>()
+        + spacing * buttons.len().saturating_sub(1) as f32;
+    let needed = label_width + spacing + MIN_SETTINGS_INPUT_WIDTH + spacing + buttons_width;
+
+    if ui.available_width() >= needed {
+        ui.horizontal(|ui| {
+            ui.label(label);
+            singleline_with_buttons(ui, value, hint, buttons)
+        })
+        .inner
+    } else {
+        ui.vertical(|ui| {
+            ui.label(label);
+            singleline_with_buttons(ui, value, hint, buttons)
+        })
+        .inner
+    }
+}
+
 fn bar_button(text: &str) -> egui::Button<'static> {
-    egui::Button::new(RichText::new(text.to_owned()).size(12.5).color(theme::TEXT))
-        .min_size(Vec2::new(66.0, 32.0))
-        .fill(theme::BG_ELEVATED)
-        .stroke(Stroke::new(1.0, theme::LINE))
-        .rounding(Rounding::same(8.0))
+    egui::Button::new(
+        RichText::new(text.to_owned())
+            .size(BAR_BUTTON_FONT_SIZE)
+            .color(theme::TEXT),
+    )
+    .min_size(Vec2::new(BAR_BUTTON_MIN_WIDTH, BAR_BUTTON_HEIGHT))
+    .fill(theme::BG_ELEVATED)
+    .stroke(Stroke::new(1.0, theme::LINE))
+    .rounding(Rounding::same(8.0))
 }
 
 fn bar_small_button(text: &str) -> egui::Button<'static> {
@@ -1025,7 +1417,7 @@ fn bar_small_button(text: &str) -> egui::Button<'static> {
             .size(11.0)
             .color(theme::TEXT_SECONDARY),
     )
-    .min_size(Vec2::new(54.0, 26.0))
+    .min_size(Vec2::new(SMALL_BUTTON_MIN_WIDTH, SMALL_BUTTON_HEIGHT))
     .fill(theme::BG_ELEVATED)
     .stroke(Stroke::new(1.0, theme::LINE))
     .rounding(Rounding::same(7.0))
@@ -1038,7 +1430,7 @@ fn primary_button(text: &str) -> egui::Button<'static> {
             .strong()
             .color(theme::BG_ROOT),
     )
-    .min_size(Vec2::new(86.0, 32.0))
+    .min_size(Vec2::new(PRIMARY_BUTTON_MIN_WIDTH, BAR_BUTTON_HEIGHT))
     .fill(theme::ACCENT)
     .stroke(Stroke::NONE)
     .rounding(Rounding::same(8.0))

@@ -9,6 +9,7 @@ mod adguard;
 mod app;
 mod channels;
 mod config;
+mod embedded;
 mod jobs;
 mod m3u;
 mod models;
@@ -133,7 +134,7 @@ fn cleanup_old_playlists(cache_dir: &Path) {
     }
 }
 
-fn configure_fonts(ctx: &egui::Context) {
+pub(crate) fn configure_fonts(ctx: &egui::Context) {
     let Some(font_bytes) = load_cjk_font_bytes() else {
         return;
     };

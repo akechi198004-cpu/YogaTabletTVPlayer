@@ -1,6 +1,7 @@
 # TouchIPTV 直播桌面版 · 便携配置
-# 首次运行可保持 vlc_path 为空，程序会自动探测 VLC。
+# 默认使用随包 mpv 内置播放；外部 VLC 仅作兼容模式。
 
+player_backend = "embedded"
 vlc_path = ""
 last_channel_key = ""
 last_filter = "全部"
@@ -10,6 +11,7 @@ fullscreen = true
 use_playlist = true
 network_caching_ms = 1500
 disable_hw_decode = false
+embedded_volume = 80
 ad_guard = true
 auto_play_last = false
 user_agent = ""

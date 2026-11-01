@@ -14,6 +14,9 @@ env:
   BIN_NAME: touchiptv-desktop
   TARGET: i686-pc-windows-msvc
   PACKAGE_NAME: touchiptv-desktop-win32
+  # 内置播放器运行时：shinchiro 的 32 位 mpv 构建（固定版本便于复现）。
+  MPV_URL: https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261101/mpv-i686-20261101-git-48fca90e8c.7z
+  MPV_SHA256: dfd73fe3c71ccef2719322ca12d712e5efcfd889e8491f45f3c6791f202bf921
 
 jobs:
   build:
@@ -48,9 +51,30 @@ jobs:
           Copy-Item "target/${env:TARGET}/release/${env:BIN_NAME}.exe" "$packageRoot/${env:BIN_NAME}.exe"
           Copy-Item "DroidSansFallbackFull.ttf" "$packageRoot/DroidSansFallbackFull.ttf"
           Copy-Item "packaging/windows/config.toml" "$packageRoot/config.toml"
+          Copy-Item "packaging/windows/MPV-NOTICE.txt" "$packageRoot/MPV-NOTICE.txt"
+          Copy-Item "packaging/windows/MPV-GPL-2.0.txt" "$packageRoot/MPV-GPL-2.0.txt"
           Copy-Item "README.md" "$packageRoot/README.md"
           Copy-Item "LICENSE-RUST" "$packageRoot/LICENSE-RUST"
           Copy-Item "snap-*.png" "$packageRoot/"
+
+          # 下载并校验 i686 mpv，把运行时一起打进压缩包。
+          $mpvArchive = Join-Path $env:RUNNER_TEMP "mpv-i686.7z"
+          Invoke-WebRequest -Uri $env:MPV_URL -OutFile $mpvArchive
+          $actualHash = (Get-FileHash -Algorithm SHA256 $mpvArchive).Hash.ToLower()
+          if ($actualHash -ne $env:MPV_SHA256) {
+            throw "mpv archive checksum mismatch: $actualHash"
+          }
+          $mpvRoot = Join-Path $packageRoot "mpv"
+          New-Item -ItemType Directory -Force -Path $mpvRoot | Out-Null
+          $sevenZip = "${env:ProgramFiles}\7-Zip\7z.exe"
+          if (!(Test-Path $sevenZip)) {
+            $sevenZip = "7z.exe"
+          }
+          & $sevenZip x $mpvArchive "-o$mpvRoot" "mpv.exe" "d3dcompiler_43.dll" -y
+          if ($LASTEXITCODE -ne 0 -or !(Test-Path (Join-Path $mpvRoot "mpv.exe"))) {
+            throw "failed to extract mpv runtime"
+          }
+
           Compress-Archive -Path $packageRoot -DestinationPath "dist/${env:PACKAGE_NAME}.zip" -Force
 
       - name: Upload Win32 zip artifact

@@ -1,7 +1,10 @@
 # TouchIPTV 直播桌面版配置示例
 # 把本文件改名为 config.toml 后放在 exe 同目录，即可进入便携模式。
 
-# VLC 可执行文件路径。留空时程序会自动探测常见安装位置。
+# 播放后端：embedded = 随包内置 mpv；external_vlc = 外部 VLC 兼容模式。
+player_backend = "embedded"
+
+# 仅外部 VLC 兼容模式需要。可填写 vlc.exe，也可在设置里选择安装目录。
 # Windows 32 位示例：C:\Program Files (x86)\VideoLAN\VLC\vlc.exe
 vlc_path = ""
 
@@ -17,24 +20,27 @@ favorites = []
 # 可选：自定义 M3U 直播源地址（界面里导入成功后自动写入）
 custom_source_url = ""
 
-# VLC 是否全屏播放
+# 外部 VLC 兼容模式是否全屏播放（内置播放用 F/按钮）
 fullscreen = true
 
-# 是否把当前筛选结果写成 VLC 播放列表，方便在 VLC 里用 N/P 换台
+# 外部 VLC 是否把当前筛选结果写成播放列表，方便在 VLC 里用 N/P 换台
 use_playlist = true
 
-# VLC 网络缓存，单位毫秒。低配平板建议 1500-3000。
+# 外部 VLC 网络缓存，单位毫秒。低配平板建议 1500-3000。
 network_caching_ms = 1500
 
-# 画面花屏/绿屏时可勾选，强制 VLC 关闭硬件解码
+# 画面花屏/绿屏时可勾选，强制关闭硬件解码（内置 mpv 与外部 VLC 同效）
 disable_hw_decode = false
+
+# 内置播放器音量 0-100
+embedded_volume = 80
 
 # 启动前检查已知广告特征（URL + HLS 清单）
 ad_guard = true
 
-# 启动程序时自动播放上次频道。默认关闭，避免一开机就弹 VLC。
+# 启动程序时自动播放上次频道。
 auto_play_last = false
 
-# 可选：自定义 HTTP User-Agent / Referer（留空使用 VLC 默认值）
+# 可选：自定义 HTTP User-Agent / Referer（留空使用播放器默认值）
 user_agent = ""
 referer = ""

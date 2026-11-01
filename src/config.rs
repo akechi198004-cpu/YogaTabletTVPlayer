@@ -9,10 +9,22 @@ use thiserror::Error;
 
 static TEMP_CONFIG_SEQ: AtomicU64 = AtomicU64::new(0);
 
+/// 播放后端。默认使用随包附带的内置播放器；外部 VLC 作为兼容方案。
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PlayerBackend {
+    #[default]
+    Embedded,
+    ExternalVlc,
+}
+
 /// 用户可持久化的全部设置。
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppConfig {
+    /// 播放后端：内置播放器或外部 VLC。
+    #[serde(default)]
+    pub player_backend: PlayerBackend,
     /// VLC 可执行文件路径。为空时启动时自动探测。
     pub vlc_path: String,
     /// 上次播放的频道 key。
@@ -31,6 +43,8 @@ pub struct AppConfig {
     pub network_caching_ms: u32,
     /// 是否强制关闭 VLC 硬件解码。
     pub disable_hw_decode: bool,
+    /// 内置播放器音量（0-100）。
+    pub embedded_volume: u8,
     /// 启动前是否检查已知广告特征。
     pub ad_guard: bool,
     /// 启动时是否自动播放上次频道。
@@ -44,6 +58,7 @@ pub struct AppConfig {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
+            player_backend: PlayerBackend::default(),
             vlc_path: String::new(),
             last_channel_key: String::new(),
             last_filter: "全部".to_owned(),
@@ -53,6 +68,7 @@ impl Default for AppConfig {
             use_playlist: true,
             network_caching_ms: 1500,
             disable_hw_decode: false,
+            embedded_volume: 80,
             ad_guard: true,
             auto_play_last: false,
             user_agent: String::new(),
@@ -75,6 +91,7 @@ impl AppConfig {
     /// 修正越界或重复字段。配置是用户可手改的，不能假设一定合法。
     pub fn normalize(&mut self) {
         self.network_caching_ms = self.network_caching_ms.min(60_000);
+        self.embedded_volume = self.embedded_volume.min(100);
         if self.last_filter.trim().is_empty() {
             self.last_filter = "全部".to_owned();
         }
@@ -150,8 +167,10 @@ mod tests {
     fn save_is_atomic_and_replaces_original() {
         let path = temp_path("atomic");
         fs::write(&path, "old = true").expect("write old config");
-        let mut config = AppConfig::default();
-        config.vlc_path = "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe".to_owned();
+        let mut config = AppConfig {
+            vlc_path: "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe".to_owned(),
+            ..AppConfig::default()
+        };
         config.favorites.push("cctv1".to_owned());
 
         config.save(&path).expect("save config");
@@ -179,11 +198,23 @@ mod tests {
     fn normalize_clamps_and_dedupes() {
         let mut config = AppConfig {
             network_caching_ms: 99_999,
+            embedded_volume: 250,
             favorites: vec!["a".into(), "a".into(), "".into(), "b".into()],
             ..Default::default()
         };
         config.normalize();
         assert_eq!(config.network_caching_ms, 60_000);
+        assert_eq!(config.embedded_volume, 100);
         assert_eq!(config.favorites, vec!["a".to_owned(), "b".to_owned()]);
+    }
+
+    #[test]
+    fn old_configs_default_to_embedded_backend() {
+        let path = temp_path("old-backend");
+        fs::write(&path, "vlc_path = \"\"\nlast_filter = \"全部\"\n").expect("write old config");
+        let config = AppConfig::load_or_default(&path).expect("load old config");
+        assert_eq!(config.player_backend, PlayerBackend::Embedded);
+        assert_eq!(config.embedded_volume, 80);
+        let _ = fs::remove_file(path);
     }
 }

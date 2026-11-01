@@ -3,6 +3,8 @@
 use std::process::Child;
 use std::time::Instant;
 
+use crate::embedded::EmbeddedPlayer;
+
 /// 一次测速的结果状态。
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum LatencyState {
@@ -110,14 +112,35 @@ pub struct PreflightOutcome {
     pub final_url: Option<String>,
 }
 
-/// 正在由外部 VLC 播放的会话。
+/// 当前播放源：内置 mpv 子窗口，或外部 VLC 进程。
+pub enum PlaybackSource {
+    External(Child),
+    Embedded(EmbeddedPlayer),
+}
+
+impl PlaybackSource {
+    pub fn is_embedded(&self) -> bool {
+        matches!(self, Self::Embedded(_))
+    }
+}
+
+/// 正在播放的会话。两种后端共用频道/线路/启动时间等界面状态。
 pub struct PlayingState {
+    /// 启动本次播放时的序号，用于丢弃迟到的内置播放器事件。
+    pub token: u64,
     pub channel_key: String,
     pub channel_name: String,
     pub line_index: usize,
-    /// 本次播放已经尝试过的线路，VLC 异常早退时用于自动顺延。
+    /// 本次播放已经尝试过的线路，外部 VLC 异常早退时用于自动顺延。
     pub tried_lines: std::collections::HashSet<usize>,
-    pub child: Child,
+    /// 实际交给播放器的地址，内置失败时可用于外部 VLC 兼容播放。
+    pub url: String,
+    pub source: PlaybackSource,
+    /// 仅内置播放器使用：当前是否处于暂停状态。
+    pub paused: bool,
+    /// 外部 VLC 是否由“改用 VLC 播放”按钮启动。
+    /// 这种会话异常退出时不再自动顺延线路，避免又切回内置播放器。
+    pub external_fallback: bool,
     pub started_at: Instant,
 }
 
