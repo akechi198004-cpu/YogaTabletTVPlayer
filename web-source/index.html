@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>TouchIPTV · 极速直播 (360-720P优选版)</title>
+    <meta name="description" content="专为触屏与桌面优化的轻享 IPTV 电视直播系统，预置实测低延迟 360P-720P 极速优质频道源，支持 HLS 流畅播放、全屏退出保护、备用线路切换与在线测速。" />
+    <meta property="og:title" content="TouchIPTV · 极速直播 (360-720P优选版)" />
+    <meta property="og:description" content="专为触屏与桌面优化的轻享 IPTV 电视直播系统，预置实测低延迟 360P-720P 极速优质频道源，支持 HLS 流畅播放、全屏退出保护、备用线路切换与在线测速。" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Early bootstrap error handler & legacy SW cleaner (Chrome 81 compatible ES5) -->
+    <script>
+      (function() {
+        // 1. Unregister any stale Service Worker from older sessions
+        if ('serviceWorker' in navigator) {
+          try {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              if (regs && regs.length) {
+                for (var i = 0; i < regs.length; i++) {
+                  regs[i].unregister();
+                }
+              }
+            }).catch(function() {});
+          } catch(e) {}
+        }
+
+        // 2. Inline polyfills for Chrome 81
+        if (!String.prototype.replaceAll) {
+          String.prototype.replaceAll = function(s, r) {
+            if (s instanceof RegExp) {
+              if (!s.global) throw new TypeError('replaceAll requires global RegExp');
+              return this.replace(s, r);
+            }
+            return this.split(String(s)).join(String(r));
+          };
+        }
+        if (!Object.hasOwn) {
+          Object.hasOwn = function(o, p) {
+            return o != null && Object.prototype.hasOwnProperty.call(Object(o), p);
+          };
+        }
+        if (!Array.prototype.at) {
+          Array.prototype.at = function(n) {
+            var k = Math.trunc(n) || 0;
+            if (k < 0) k += this.length;
+            if (k < 0 || k >= this.length) return undefined;
+            return this[k];
+          };
+        }
+
+        // 3. Global bootstrap error capture to prevent white screen
+        window.__hasAppBooted = false;
+        function showBootError(title, detail) {
+          if (window.__hasAppBooted) return;
+          var errBox = document.getElementById('boot-error-container');
+          var titleEl = document.getElementById('boot-error-title');
+          var detailEl = document.getElementById('boot-error-detail');
+          var spinnerEl = document.getElementById('boot-spinner');
+          if (errBox) errBox.style.display = 'block';
+          if (spinnerEl) spinnerEl.style.display = 'none';
+          if (titleEl) titleEl.innerText = title || '网页加载出错';
+          if (detailEl) detailEl.innerText = detail || '未知错误';
+        }
+
+        window.addEventListener('error', function(event) {
+          var msg = event.message || '脚本执行异常';
+          var loc = '';
+          if (event.filename) {
+            loc = ' (' + event.filename.split('/').pop() + ':' + event.lineno + ':' + event.colno + ')';
+          }
+          showBootError('脚本语法或执行错误', msg + loc);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event.reason ? (event.reason.message || String(event.reason)) : 'Promise异常';
+          showBootError('异步模块加载失败', reason);
+        });
+
+        // 4. Timeout safeguard: if app does not boot in 10s, show troubleshooting notice
+        setTimeout(function() {
+          if (!window.__hasAppBooted && !document.querySelector('#root > div:not(#boot-splash)')) {
+            showBootError('加载时间过长', '若持续白屏，请点击下方刷新按钮或检查网络与代理设置。');
+          }
+        }, 10000);
+      })();
+    </script>
+  </head>
+  <body class="antialiased selection:bg-amber-500 selection:text-black bg-[#181a1d] text-slate-100">
+    <div id="root">
+      <!-- Boot Splash & Error Fallback: Replaced when React mounts -->
+      <div id="boot-splash" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;">
+        <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #0284c7, #38bdf8); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35); margin-bottom: 16px;">
+          <svg style="width: 28px; height: 28px; fill: white;" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+        </div>
+        <div style="font-size: 19px; font-weight: 700; color: #f8fafc; letter-spacing: 0.5px;">TouchIPTV · 极速直播</div>
+        <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">专为平板触屏与低延迟播放优化</div>
+
+        <div id="boot-spinner" style="margin-top: 24px; display: flex; align-items: center; gap: 8px; color: #38bdf8; font-size: 13px;">
+          <div style="width: 16px; height: 16px; border: 2px solid rgba(56, 189, 248, 0.3); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+          <span>正在初始化播放系统...</span>
+        </div>
+
+        <div id="boot-error-container" style="display: none; margin-top: 20px; max-width: 460px; width: 100%; background: #261618; border: 1px solid #7f1d1d; border-radius: 12px; padding: 14px 16px; text-align: left;">
+          <div id="boot-error-title" style="font-size: 13px; font-weight: 700; color: #f87171; margin-bottom: 6px;"></div>
+          <div id="boot-error-detail" style="font-size: 12px; color: #fca5a5; line-height: 1.5; font-family: monospace; word-break: break-all;"></div>
+          <button type="button" onclick="window.location.reload(true)" style="margin-top: 12px; width: 100%; padding: 8px 12px; border-radius: 8px; background: #dc2626; color: white; border: none; font-size: 12px; font-weight: 600; cursor: pointer;">强制刷新页面</button>
+        </div>
+      </div>
+      <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

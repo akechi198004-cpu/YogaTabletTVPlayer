@@ -1,0 +1,23 @@
+[package]
+name = "touchiptv-desktop"
+version = "1.0.0"
+edition = "2021"
+description = "TouchIPTV 直播桌面版：面向 Win32 低性能平板的轻量直播启动器"
+license = "MIT"
+
+[dependencies]
+directories = "5.0"
+eframe = { version = "0.27", default-features = false, features = ["default_fonts", "glow"] }
+egui = "0.27"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "gzip", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+toml = "0.8"
+url = "2.5"
+
+[profile.release]
+# 低配平板优先控制体积，同时保留足够的运行速度。
+opt-level = "s"
+lto = true
+codegen-units = 1

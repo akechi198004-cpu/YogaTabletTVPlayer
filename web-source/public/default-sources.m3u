@@ -1,0 +1,89 @@
+#EXTM3U name="TouchIPTV 360P-720P 极速优选默认源"
+#EXTINF:-1 tvg-name="HLS 播放功能测试（非直播）" tvg-logo="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=100&auto=format&fit=crop&q=60" group-title="测试" resolution="720P",HLS 播放功能测试（非直播） [720P · 28ms]
+https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+#EXTINF:-1 tvg-name="CCTV 兵器科技" tvg-logo="https://i.imgur.com/QlF96eS.png" group-title="央视" resolution="720P",CCTV 兵器科技 [720P · 501ms]
+http://38.75.136.137:98/gslb/dsdqpub/gfjs.m3u8?auth=testpub
+#EXTINF:-1 tvg-name="CCTV 高尔夫网球" tvg-logo="https://i.imgur.com/iqJJTmH.png" group-title="央视" resolution="720P",CCTV 高尔夫网球 [720P · 307ms]
+http://38.75.136.137:98/gslb/dsdqpub/gefwq.m3u8?auth=testpub
+#EXTINF:-1 tvg-name="CCTV 怀旧剧场" tvg-logo="https://i.imgur.com/TVs9PBc.png" group-title="央视" resolution="720P",CCTV 怀旧剧场 [720P · 507ms]
+http://38.75.136.137:98/gslb/dsdqpub/hjjc.m3u8?auth=testpub
+#EXTINF:-1 tvg-name="CCTV-1 综合" tvg-logo="https://i.imgur.com/TpA3cUl.png" group-title="央视" resolution="720P",CCTV-1 综合 [720P · 631ms]
+http://74.91.26.218:82/live/cctv1hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-10 科教" tvg-logo="https://i.imgur.com/sSSO7UD.png" group-title="央视" resolution="720P",CCTV-10 科教 [720P · 410ms]
+http://74.91.26.218:82/live/cctv10hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-11 戏曲" tvg-logo="https://i.imgur.com/CjOWx7L.png" group-title="央视" resolution="720P",CCTV-11 戏曲 [720P · 410ms]
+http://74.91.26.218:82/live/cctv11hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-12 社会与法" tvg-logo="https://i.imgur.com/3yTuiOM.png" group-title="央视" resolution="720P",CCTV-12 社会与法 [720P · 509ms]
+http://74.91.26.218:82/live/cctv12hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-13 新闻" tvg-logo="https://i.imgur.com/6MTar6J.png" group-title="央视" resolution="720P",CCTV-13 新闻 [720P · 311ms]
+http://74.91.26.218:82/live/cctv13hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-14 少儿" tvg-logo="https://i.imgur.com/c5SXW7i.png" group-title="央视" resolution="720P",CCTV-14 少儿 [720P · 306ms]
+http://74.91.26.218:82/live/cctv14hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-15 音乐" tvg-logo="https://live.fanmingming.cn/tv/CCTV15.png" group-title="央视" resolution="720P",CCTV-15 音乐 [720P · 306ms]
+http://198.204.228.26/live/cctv15hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-16 奥林匹克" tvg-logo="https://live.fanmingming.cn/tv/CCTV16.png" group-title="央视" resolution="720P",CCTV-16 奥林匹克 [720P · 607ms]
+http://38.75.136.137:98/gslb/dsdqbv/cctv16hd.m3u8?auth=test20251009
+#EXTINF:-1 tvg-name="CCTV-17 农业农村" tvg-logo="https://live.fanmingming.cn/tv/CCTV17.png" group-title="央视" resolution="720P",CCTV-17 农业农村 [720P · 518ms]
+http://38.75.136.137:98/gslb/dsdqbv/cctv17hd.m3u8?auth=test20251009
+#EXTINF:-1 tvg-name="CCTV-2 财经" tvg-logo="https://i.imgur.com/ILamhwU.png" group-title="央视" resolution="720P",CCTV-2 财经 [720P · 621ms]
+http://74.91.26.218:82/live/cctv2hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-3 综艺" tvg-logo="https://i.imgur.com/iFlkIuw.png" group-title="央视" resolution="720P",CCTV-3 综艺 [720P · 411ms]
+http://74.91.26.218:82/live/cctv3hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-4 中文国际" tvg-logo="https://live.fanmingming.cn/tv/CCTV4.png" group-title="央视" resolution="720P",CCTV-4 中文国际 [720P · 412ms]
+http://107.150.60.122/live/cctv4hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-5 体育" tvg-logo="https://live.fanmingming.cn/tv/CCTV5.png" group-title="央视" resolution="720P",CCTV-5 体育 [720P · 412ms]
+http://38.75.136.137:98/gslb/dsdqbv/cctv5p.m3u8?auth=test20251009
+#EXTINF:-1 tvg-name="CCTV-6 电影" tvg-logo="https://i.imgur.com/rFiaef7.png" group-title="央视" resolution="720P",CCTV-6 电影 [720P · 609ms]
+http://69.30.245.50/live/cctv6.m3u8
+#EXTINF:-1 tvg-name="CCTV-7 国防军事" tvg-logo="https://i.imgur.com/CKcPMQC.png" group-title="央视" resolution="720P",CCTV-7 国防军事 [720P · 612ms]
+http://74.91.26.218:82/live/cctv7hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-8 电视剧" tvg-logo="https://i.imgur.com/GyHaZ8X.png" group-title="央视" resolution="720P",CCTV-8 电视剧 [720P · 415ms]
+http://74.91.26.218:82/live/cctv8hd.m3u8
+#EXTINF:-1 tvg-name="CCTV-9 纪录" tvg-logo="https://i.imgur.com/3tivvMm.png" group-title="央视" resolution="720P",CCTV-9 纪录 [720P · 11ms]
+https://xykt-fix.github.io/Y77.m3u8
+#EXTINF:-1 tvg-name="CCTV+ 1" tvg-logo="https://i.imgur.com/U8d4Is6.png" group-title="央视" resolution="600P",CCTV+ 1 [600P · 16ms]
+https://cd-live-stream.news.cctvplus.com/live/smil:CHANNEL1.smil/playlist.m3u8
+#EXTINF:-1 tvg-name="CCTV+ 2" tvg-logo="https://i.imgur.com/qSg862A.png" group-title="央视" resolution="600P",CCTV+ 2 [600P · 5ms]
+https://cd-live-stream.news.cctvplus.com/live/smil:CHANNEL2.smil/playlist.m3u8
+#EXTINF:-1 tvg-name="东南卫视" tvg-logo="https://live.fanmingming.cn/tv/东南卫视.png" group-title="卫视" resolution="720P",东南卫视 [720P · 525ms]
+http://38.75.136.137:98/gslb/dsdqpub/dnwshd.m3u8?auth=testpub
+#EXTINF:-1 tvg-name="内蒙古卫视" tvg-logo="" group-title="卫视" resolution="640P",内蒙古卫视 [640P · 1296ms]
+https://nmgpull.nmgcntv.cn/live/nmtv1.m3u8
+#EXTINF:-1 tvg-name="宁夏卫视" tvg-logo="https://live.fanmingming.cn/tv/宁夏卫视.png" group-title="卫视" resolution="720P",宁夏卫视 [720P · 408ms]
+http://198.204.228.26/live/nxws.m3u8
+#EXTINF:-1 tvg-name="人间卫视 Beautiful Life" tvg-logo="" group-title="卫视" resolution="720P",人间卫视 Beautiful Life [720P · 593ms]
+https://bltv.live/hls/live.m3u8
+#EXTINF:-1 tvg-name="三沙卫视" tvg-logo="https://www.xn--rgv465a.top/tvlogo/三沙卫视.png" group-title="卫视" resolution="576P",三沙卫视 [576P · 703ms]
+http://107.150.60.122/live/ssws.m3u8
+#EXTINF:-1 tvg-name="厦门卫视" tvg-logo="https://www.xn--rgv465a.top/tvlogo/厦门卫视.png" group-title="卫视" resolution="576P",厦门卫视 [576P · 624ms]
+http://107.150.60.122/live/xmws.m3u8
+#EXTINF:-1 tvg-name="山西卫视" tvg-logo="https://live.fanmingming.cn/tv/山西卫视.png" group-title="卫视" resolution="720P",山西卫视 [720P · 659ms]
+http://107.150.60.122/live/sxwshd.m3u8
+#EXTINF:-1 tvg-name="CGTN 环球财经" tvg-logo="" group-title="新闻" resolution="720P",CGTN 环球财经 [720P · 1491ms]
+https://news.cgtn.com/resource/live/biz/cgtn-biz.m3u8
+#EXTINF:-1 tvg-name="CGTN 英语新闻" tvg-logo="" group-title="新闻" resolution="720P",CGTN 英语新闻 [720P · 1656ms]
+https://news.cgtn.com/resource/live/english/cgtn-news.m3u8
+#EXTINF:-1 tvg-name="爱自然 Love Nature" tvg-logo="" group-title="其他" resolution="720P",爱自然 Love Nature [720P · 860ms]
+https://d1k28r2i3w8f0d.cloudfront.net/out/v1/a24b172a6a9b49b392a8323a63ecfe15/index.m3u8
+#EXTINF:-1 tvg-name="白城综合" tvg-logo="https://www.tvchinese.net/uploads/tv/baicheng.jpg" group-title="其他" resolution="576P",白城综合 [576P · 388ms]
+https://stream2.jlntv.cn/baicheng1/sd/live.m3u8
+#EXTINF:-1 tvg-name="宝贝早教 BabyFirst" tvg-logo="" group-title="其他" resolution="720P",宝贝早教 BabyFirst [720P · 705ms]
+https://babyfirst-samsungbrazil.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-name="东方卫视 国际频道" tvg-logo="https://i.imgur.com/WqM6xnF.png" group-title="其他" resolution="720P",东方卫视 国际频道 [720P · 292ms]
+https://restream.pdtvhd.com/memfs/0b1b95c9-3543-4af9-9fdb-cf45f1602f17.m3u8
+#EXTINF:-1 tvg-name="广东卫视" tvg-logo="https://parco-zh.github.io/demo/guangdong.jpg" group-title="其他" resolution="720P",广东卫视 [720P · 111ms]
+https://h5cul1yar48um3t.wcetv.com/hls/gdsatellite.m3u8
+#EXTINF:-1 tvg-name="广西综艺旅游" tvg-logo="https://www.tvchinese.net/uploads/tv/gxzypd.jpg" group-title="其他" resolution="576P",广西综艺旅游 [576P · 110ms]
+http://111.59.24.227:8181/tsfile/live/1001_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="广州综合" tvg-logo="https://i.imgur.com/ff3KQXp.png" group-title="其他" resolution="720P",广州综合 [720P · 827ms]
+https://tencentplaybusiness.gztv.com/live/zonghes.m3u8
+#EXTINF:-1 tvg-name="探索发现" tvg-logo="" group-title="其他" resolution="720P",探索发现 [720P · 1081ms]
+https://stream.discoveringchina.cn/live/playlist.m3u8
+#EXTINF:-1 tvg-name="天使中文台" tvg-logo="https://i.imgur.com/qKLEGU7.png" group-title="其他" resolution="720P",天使中文台 [720P · 1257ms]
+https://janya-digimix.akamaized.net/vglive-sk-999451/chinese/ngrp:angelchinese_all/playlist.m3u8
+#EXTINF:-1 tvg-name="中国旅游" tvg-logo="" group-title="其他" resolution="720P",中国旅游 [720P · 1076ms]
+https://stream.chinatravel.cn/live/playlist.m3u8
+#EXTINF:-1 tvg-name="ABN 中文台" tvg-logo="https://i.imgur.com/zagVLQH.png" group-title="其他" resolution="360P",ABN 中文台 [360P · 537ms]
+https://mediaserver.abnvideos.com/streams/abnchina.m3u8
+#EXTINF:-1 tvg-name="LLBN 中文台" tvg-logo="" group-title="其他" resolution="480P",LLBN 中文台 [480P · 981ms]
+https://edge.smartstream.tv/live/llbnchinese/playlist.m3u8

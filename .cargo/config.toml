@@ -1,0 +1,6 @@
+# 静态链接 MSVC 运行库，避免目标平板缺少 vcruntime140.dll。
+[target.i686-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

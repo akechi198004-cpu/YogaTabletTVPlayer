@@ -1,0 +1,40 @@
+# TouchIPTV 直播桌面版配置示例
+# 把本文件改名为 config.toml 后放在 exe 同目录，即可进入便携模式。
+
+# VLC 可执行文件路径。留空时程序会自动探测常见安装位置。
+# Windows 32 位示例：C:\Program Files (x86)\VideoLAN\VLC\vlc.exe
+vlc_path = ""
+
+# 记住上次播放的频道（内部 key，不建议手改）
+last_channel_key = ""
+
+# 上次使用的分类
+last_filter = "全部"
+
+# 收藏频道（内部 key，不建议手改）
+favorites = []
+
+# 可选：自定义 M3U 直播源地址（界面里导入成功后自动写入）
+custom_source_url = ""
+
+# VLC 是否全屏播放
+fullscreen = true
+
+# 是否把当前筛选结果写成 VLC 播放列表，方便在 VLC 里用 N/P 换台
+use_playlist = true
+
+# VLC 网络缓存，单位毫秒。低配平板建议 1500-3000。
+network_caching_ms = 1500
+
+# 画面花屏/绿屏时可勾选，强制 VLC 关闭硬件解码
+disable_hw_decode = false
+
+# 启动前检查已知广告特征（URL + HLS 清单）
+ad_guard = true
+
+# 启动程序时自动播放上次频道。默认关闭，避免一开机就弹 VLC。
+auto_play_last = false
+
+# 可选：自定义 HTTP User-Agent / Referer（留空使用 VLC 默认值）
+user_agent = ""
+referer = ""

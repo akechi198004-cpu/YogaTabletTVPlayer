@@ -1,0 +1,142 @@
+import fs from 'fs';
+import path from 'path';
+
+const rawData = {
+  "source": {
+    "name": "开源组合·全频道",
+    "channel_count": 104,
+    "group_count": 9,
+    "groups_order": ["央视", "卫视", "苏州", "香港", "台湾", "日本", "国际", "纪录", "少儿"]
+  },
+  "channels": [
+    {"app_index": 0, "seq": 1, "name": "CCTV-1 综合", "group": "央视", "file_index": 0, "url": "http://107.150.60.122/live/cctv1hd.m3u8"},
+    {"app_index": 1, "seq": 2, "name": "CCTV-2 财经", "group": "央视", "file_index": 1, "url": "http://107.150.60.122/live/cctv2hd.m3u8"},
+    {"app_index": 2, "seq": 3, "name": "CCTV-3 综艺", "group": "央视", "file_index": 2, "url": "http://107.150.60.122/live/cctv3hd.m3u8"},
+    {"app_index": 3, "seq": 4, "name": "CCTV-4 中文国际", "group": "央视", "file_index": 3, "url": "http://107.150.60.122/live/cctv4hd.m3u8"},
+    {"app_index": 4, "seq": 5, "name": "CCTV-5 体育", "group": "央视", "file_index": 4, "url": "http://107.150.60.122/live/cctv5hd.m3u8"},
+    {"app_index": 5, "seq": 6, "name": "CCTV-6 电影", "group": "央视", "file_index": 5, "url": "http://107.150.60.122/live/cctv6hd.m3u8"},
+    {"app_index": 6, "seq": 7, "name": "CCTV-7 国防军事", "group": "央视", "file_index": 6, "url": "http://107.150.60.122/live/cctv7hd.m3u8"},
+    {"app_index": 7, "seq": 8, "name": "CCTV-8 电视剧", "group": "央视", "file_index": 7, "url": "http://107.150.60.122/live/cctv8hd.m3u8"},
+    {"app_index": 8, "seq": 9, "name": "CCTV-9 纪录", "group": "央视", "file_index": 8, "url": "http://107.150.60.122/live/cctv9hd.m3u8"},
+    {"app_index": 9, "seq": 10, "name": "CCTV-10 科教", "group": "央视", "file_index": 9, "url": "http://107.150.60.122/live/cctv10hd.m3u8"},
+    {"app_index": 10, "seq": 11, "name": "CCTV-11 戏曲", "group": "央视", "file_index": 10, "url": "http://107.150.60.122/live/cctv11hd.m3u8"},
+    {"app_index": 11, "seq": 12, "name": "CCTV-12 社会与法", "group": "央视", "file_index": 11, "url": "http://107.150.60.122/live/cctv12hd.m3u8"},
+    {"app_index": 12, "seq": 13, "name": "CCTV-13 新闻", "group": "央视", "file_index": 12, "url": "http://107.150.60.122/live/cctv13hd.m3u8"},
+    {"app_index": 13, "seq": 14, "name": "CCTV-14 少儿", "group": "央视", "file_index": 13, "url": "http://107.150.60.122/live/cctv14hd.m3u8"},
+    {"app_index": 14, "seq": 15, "name": "CCTV-15 音乐", "group": "央视", "file_index": 14, "url": "http://107.150.60.122/live/cctv15hd.m3u8"},
+    {"app_index": 15, "seq": 16, "name": "CCTV-17 农业农村", "group": "央视", "file_index": 15, "url": "http://107.150.60.122/live/cctv17hd.m3u8"},
+    {"app_index": 16, "seq": 17, "name": "CCTV-16 奥林匹克", "group": "央视", "file_index": 16, "url": "http://gmxw.7766.org:808/hls/169/index.m3u8"},
+    {"app_index": 17, "seq": 18, "name": "CCTV-World Geography", "group": "央视", "file_index": 55, "url": "http://107.150.60.122/live/sjdl.m3u8"},
+    {"app_index": 18, "seq": 19, "name": "CCTV-兵器科技", "group": "央视", "file_index": 56, "url": "http://38.75.136.137:98/gslb/dsdqpub/gfjs.m3u8?auth=testpub"},
+    {"app_index": 19, "seq": 20, "name": "风云剧场", "group": "央视", "file_index": 82, "url": "http://173.208.212.130:8181/720p/fyjc.m3u8"},
+    {"app_index": 20, "seq": 21, "name": "CHC动作电影", "group": "央视", "file_index": 83, "url": "http://107.150.60.122/live/chcdz.m3u8"},
+    {"app_index": 21, "seq": 22, "name": "CHC家庭影院", "group": "央视", "file_index": 84, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=chcjt"},
+    {"app_index": 22, "seq": 23, "name": "第一剧场", "group": "央视", "file_index": 85, "url": "http://107.150.60.122/live/dyjc.m3u8"},
+    {"app_index": 23, "seq": 24, "name": "文化精品", "group": "央视", "file_index": 86, "url": "http://107.150.60.122/live/ysjp.m3u8"},
+    {"app_index": 24, "seq": 25, "name": "央视台球", "group": "央视", "file_index": 87, "url": "http://107.150.60.122/live/ystq.m3u8"},
+    {"app_index": 25, "seq": 26, "name": "风云足球", "group": "央视", "file_index": 88, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=fyzq"},
+    {"app_index": 26, "seq": 27, "name": "风云音乐", "group": "央视", "file_index": 89, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=fyyy"},
+    {"app_index": 27, "seq": 28, "name": "CCTV-5+ 体育赛事", "group": "央视", "file_index": 90, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv5p"},
+    {"app_index": 28, "seq": 29, "name": "东方卫视", "group": "卫视", "file_index": 17, "url": "https://bp-resource-dfl.bestv.cn/148/3/video.m3u8"},
+    {"app_index": 29, "seq": 30, "name": "浙江卫视", "group": "卫视", "file_index": 18, "url": "http://107.150.60.122/live/zjwshd.m3u8"},
+    {"app_index": 30, "seq": 31, "name": "江苏卫视", "group": "卫视", "file_index": 19, "url": "http://107.150.60.122/live/jswshd.m3u8"},
+    {"app_index": 31, "seq": 32, "name": "深圳卫视", "group": "卫视", "file_index": 20, "url": "http://107.150.60.122/live/szwshd.m3u8"},
+    {"app_index": 32, "seq": 33, "name": "江西卫视", "group": "卫视", "file_index": 21, "url": "http://112.27.5.218:9901/tsfile/live/faacts/0138_1.m3u8?key=txiptv&playlive=1&authid=0"},
+    {"app_index": 33, "seq": 34, "name": "河北卫视", "group": "卫视", "file_index": 22, "url": "http://event.pull.hebtv.com/jishi/weishi_tingyun.m3u8"},
+    {"app_index": 34, "seq": 35, "name": "新疆卫视", "group": "卫视", "file_index": 23, "url": "http://218.84.12.186:8001/hls/main/playlist.m3u8?zxinjd;http://218.84.12.186:8001/hls/main/playlist.m3u8zxinjd"},
+    {"app_index": 35, "seq": 36, "name": "广东卫视", "group": "卫视", "file_index": 67, "url": "http://38.75.136.137:98/gslb/dsdqpub/gdwshd.m3u8?auth=testpub"},
+    {"app_index": 36, "seq": 37, "name": "湖南卫视", "group": "卫视", "file_index": 68, "url": "http://107.150.60.122/live/hnwshd.m3u8"},
+    {"app_index": 37, "seq": 38, "name": "贵州卫视", "group": "卫视", "file_index": 69, "url": "http://107.150.60.122/live/gzwshd.m3u8"},
+    {"app_index": 38, "seq": 39, "name": "陕西卫视", "group": "卫视", "file_index": 70, "url": "http://107.150.60.122/live/snwshd.m3u8"},
+    {"app_index": 39, "seq": 40, "name": "宁夏卫视", "group": "卫视", "file_index": 71, "url": "http://107.150.60.122/live/nxws.m3u8"},
+    {"app_index": 40, "seq": 41, "name": "四川卫视", "group": "卫视", "file_index": 72, "url": "http://107.150.60.122/live/scwshd.m3u8"},
+    {"app_index": 41, "seq": 42, "name": "湖北卫视", "group": "卫视", "file_index": 73, "url": "http://107.150.60.122/live/hbwshd.m3u8"},
+    {"app_index": 42, "seq": 43, "name": "厦门卫视", "group": "卫视", "file_index": 74, "url": "http://192.151.150.154/live/xmws.m3u8"},
+    {"app_index": 43, "seq": 44, "name": "山西卫视", "group": "卫视", "file_index": 75, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sxwshd"},
+    {"app_index": 44, "seq": 45, "name": "西藏卫视", "group": "卫视", "file_index": 76, "url": "http://107.150.60.122/live/xzws.m3u8"},
+    {"app_index": 45, "seq": 46, "name": "安徽卫视", "group": "卫视", "file_index": 77, "url": "http://107.150.60.122/live/ahwshd.m3u8"},
+    {"app_index": 46, "seq": 47, "name": "山东卫视", "group": "卫视", "file_index": 78, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sdwshd"},
+    {"app_index": 47, "seq": 48, "name": "重庆卫视", "group": "卫视", "file_index": 79, "url": "http://107.150.60.122/live/cqwshd.m3u8"},
+    {"app_index": 48, "seq": 49, "name": "北京卫视", "group": "卫视", "file_index": 80, "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=bjwshd"},
+    {"app_index": 49, "seq": 50, "name": "广东体育", "group": "卫视", "file_index": 93, "url": "https://epg.pw/stream/7b470f9fc5c305db0c8622117b7b25ca00eb35ba3e93e865cf0ff9df5c736681.m3u8"},
+    {"app_index": 50, "seq": 51, "name": "东南卫视", "group": "卫视", "file_index": 94, "url": "http://101.66.198.18:9901/tsfile/live/0137_1.m3u8?key=txiptv&playlive=0&authid=0"},
+    {"app_index": 51, "seq": 52, "name": "天津卫视", "group": "卫视", "file_index": 95, "url": "http://125.93.74.27:9002/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0"},
+    {"app_index": 52, "seq": 53, "name": "河南卫视", "group": "卫视", "file_index": 96, "url": "http://101.66.198.18:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=0&authid=0"},
+    {"app_index": 53, "seq": 54, "name": "海南卫视", "group": "卫视", "file_index": 97, "url": "http://125.93.74.27:9002/tsfile/live/0109_1.m3u8?key=txiptv&playlive=1&authid=0"},
+    {"app_index": 54, "seq": 55, "name": "黑龙江卫视", "group": "卫视", "file_index": 98, "url": "http://101.66.198.18:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0"},
+    {"app_index": 55, "seq": 56, "name": "云南卫视", "group": "卫视", "file_index": 99, "url": "http://101.66.198.18:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0"},
+    {"app_index": 56, "seq": 57, "name": "吉林卫视", "group": "卫视", "file_index": 100, "url": "http://101.66.198.18:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0"},
+    {"app_index": 57, "seq": 58, "name": "广西卫视", "group": "卫视", "file_index": 101, "url": "http://101.66.198.18:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0"},
+    {"app_index": 58, "seq": 59, "name": "青海卫视", "group": "卫视", "file_index": 102, "url": "http://125.93.74.27:9002/tsfile/live/0140_2.m3u8?key=txiptv&playlive=1&authid=0"},
+    {"app_index": 59, "seq": 60, "name": "苏州新闻综合", "group": "苏州", "file_index": 24, "url": "https://live-auth.51kandianshi.com/szgd/csztv1.m3u8"},
+    {"app_index": 60, "seq": 61, "name": "苏州社会经济", "group": "苏州", "file_index": 25, "url": "https://live-auth.51kandianshi.com/szgd/csztv2.m3u8"},
+    {"app_index": 61, "seq": 62, "name": "苏州文化生活", "group": "苏州", "file_index": 26, "url": "https://live-auth.51kandianshi.com/szgd/csztv3.m3u8"},
+    {"app_index": 62, "seq": 63, "name": "苏州生活资讯", "group": "苏州", "file_index": 27, "url": "https://live-auth.51kandianshi.com/szgd/csztv5.m3u8"},
+    {"app_index": 63, "seq": 64, "name": "TVB翡翠台", "group": "香港", "file_index": 28, "url": "http://103.172.187.30:12000/stream/mytv/null-1/master.m3u8"},
+    {"app_index": 64, "seq": 65, "name": "TVB经典台", "group": "香港", "file_index": 29, "url": "http://103.172.187.30:12000/stream/mytv/null-12/master.m3u8"},
+    {"app_index": 65, "seq": 66, "name": "黄金华剧台", "group": "香港", "file_index": 30, "url": "http://103.172.187.30:12000/stream/mytv/null-8/master.m3u8"},
+    {"app_index": 66, "seq": 67, "name": "美亚电影台", "group": "香港", "file_index": 31, "url": "http://103.172.187.30:12000/stream/mytv/null-2/master.m3u8"},
+    {"app_index": 67, "seq": 68, "name": "中国电影频道", "group": "香港", "file_index": 32, "url": "http://103.172.187.30:12000/stream/mytv/null-3/master.m3u8"},
+    {"app_index": 68, "seq": 69, "name": "凤凰中文", "group": "香港", "file_index": 33, "url": "http://43.152.224.209/qctv.fengshows.cn/live/0701pcc72.flv"},
+    {"app_index": 69, "seq": 70, "name": "凤凰资讯", "group": "香港", "file_index": 34, "url": "http://43.152.224.209/qctv.fengshows.cn/live/0701pin72.flv"},
+    {"app_index": 70, "seq": 71, "name": "凤凰香港", "group": "香港", "file_index": 35, "url": "http://43.152.224.209/qctv.fengshows.cn/live/0701phk72.flv"},
+    {"app_index": 71, "seq": 72, "name": "大立电视", "group": "台湾", "file_index": 36, "url": "http://www.dalitv.com.tw:4568/live/dali/index.m3u8"},
+    {"app_index": 72, "seq": 73, "name": "人间卫视", "group": "台湾", "file_index": 37, "url": "http://61.216.67.119:1935/bltvhd/bltv1/chunklist_w1266569526.m3u8"},
+    {"app_index": 73, "seq": 74, "name": "TVBS亚洲", "group": "台湾", "file_index": 81, "url": "http://38.64.72.148/hls/modn/list/4005/chunklist0.m3u8"},
+    {"app_index": 74, "seq": 75, "name": "NHK World", "group": "日本", "file_index": 38, "url": "https://masterpl.hls.nhkworld.jp/hls/w/live/smarttv.m3u8"},
+    {"app_index": 75, "seq": 76, "name": "日本电视台NEWS", "group": "日本", "file_index": 44, "url": "https://cdn-apne1.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-news1hlscmaf-rakutenjp/playlist.m3u8"},
+    {"app_index": 76, "seq": 77, "name": "MBS新闻", "group": "日本", "file_index": 45, "url": "https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-news5-cmaf-rakutenjp/playlist.m3u8"},
+    {"app_index": 77, "seq": 78, "name": "Weathernews", "group": "日本", "file_index": 46, "url": "https://rch01e-alive-hls.akamaized.net/38fb45b25cdb05a1/out/v1/4e907bfabc684a1dae10df8431a84d21/index.m3u8"},
+    {"app_index": 78, "seq": 79, "name": "NHK World Premium", "group": "日本", "file_index": 54, "url": "https://media-tyo.hls.nhkworld.jp/hls/wp/live/master.m3u8"},
+    {"app_index": 79, "seq": 80, "name": "CNN", "group": "国际", "file_index": 39, "url": "https://d3bp6dwmpbdajl.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-ury0meh5m4nzm/index.m3u8"},
+    {"app_index": 80, "seq": 81, "name": "LiveNOW from FOX", "group": "国际", "file_index": 40, "url": "https://fox-foxnewsnow-vizio.amagi.tv/playlist.m3u8"},
+    {"app_index": 81, "seq": 82, "name": "BBC News", "group": "国际", "file_index": 41, "url": "https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/t=3840/v=pv14/b=5070016/main.m3u8"},
+    {"app_index": 82, "seq": 83, "name": "CNA", "group": "国际", "file_index": 42, "url": "https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8"},
+    {"app_index": 83, "seq": 84, "name": "NBC News NOW", "group": "国际", "file_index": 47, "url": "https://d1si3n1st4nkgb.cloudfront.net/10502/88896001/hls/master.m3u8?ads.xumo_channelId=88896001"},
+    {"app_index": 84, "seq": 85, "name": "DW English", "group": "国际", "file_index": 48, "url": "https://amg01644-amg01644c1-amgplt0343.playout.now3.amagi.tv/ts-eu-w1-n2/playlist/amg01644-amg01644c1-amgplt0343/playlist.m3u8"},
+    {"app_index": 85, "seq": 86, "name": "CNBC UK", "group": "国际", "file_index": 49, "url": "https://amg01079-nbcuuk-amg01079c2-samsung-gb-1258.playouts.now.amagi.tv/playlist.m3u8"},
+    {"app_index": 86, "seq": 87, "name": "Sky News Extra 1", "group": "国际", "file_index": 50, "url": "https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8"},
+    {"app_index": 87, "seq": 88, "name": "Scripps News", "group": "国际", "file_index": 51, "url": "https://aegis-cloudfront-1.tubi.video/7e1c26b7-7975-4240-9a4f-480eaa8f3ea4/playlist.m3u8"},
+    {"app_index": 88, "seq": 89, "name": "TV BRICS 中文", "group": "国际", "file_index": 52, "url": "https://chibrics.mediacdn.ru/cdn/brics/chinese/playlist.m3u8"},
+    {"app_index": 89, "seq": 90, "name": "NewsWorld", "group": "国际", "file_index": 53, "url": "https://amg01076-lightning-amg01076c5-rakuten-us-1788.playouts.now.amagi.tv/playlist/amg01076-lightning-newsworld-rakutenus/playlist.m3u8"},
+    {"app_index": 90, "seq": 91, "name": "OAN Plus", "group": "国际", "file_index": 61, "url": "https://oan-plus-tcl.amagi.tv/playlist.m3u8"},
+    {"app_index": 91, "seq": 92, "name": "Reuters TV", "group": "国际", "file_index": 62, "url": "https://amg00453-reuters-amg00453c1-rakuten-uk-2110.playouts.now.amagi.tv/playlist/amg00453-reuters-reuters-rakutenuk/playlist.m3u8"},
+    {"app_index": 92, "seq": 93, "name": "USA TODAY", "group": "国际", "file_index": 63, "url": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg00731-gannettcoinc-usatodaynews-plex/playlist.m3u8"},
+    {"app_index": 93, "seq": 94, "name": "半岛电视台英语", "group": "国际", "file_index": 64, "url": "https://live-hls-apps-aje-fa.getaj.net/AJE/index.m3u8"},
+    {"app_index": 94, "seq": 95, "name": "NBC Sports NOW", "group": "国际", "file_index": 92, "url": "https://d4whmvwm0rdvi.cloudfront.net/10007/99993008/hls/master.m3u8?ads.xumo_channelId=99993008"},
+    {"app_index": 95, "seq": 96, "name": "Wild Earth", "group": "纪录", "file_index": 43, "url": "https://wildearth-plex.amagi.tv/masterR1080p.m3u8"},
+    {"app_index": 96, "seq": 97, "name": "CGTN Documentary", "group": "纪录", "file_index": 57, "url": "https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8"},
+    {"app_index": 97, "seq": 98, "name": "BBC Earth", "group": "纪录", "file_index": 58, "url": "https://amg00793-amg00793c6-xumo-us-2669.playouts.now.amagi.tv/BBCStudios-BBCEarthA-hls/playlist.m3u8"},
+    {"app_index": 98, "seq": 99, "name": "Documentary+", "group": "纪录", "file_index": 59, "url": "https://ef79b15c8c7c46c7a9de9d33001dbd07.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-859-DOCUMENTARYPLUS-DOCUMENTARYPLUS/mt/documentaryplus/859/hls/master/playlist.m3u8"},
+    {"app_index": 99, "seq": 100, "name": "Love Nature", "group": "纪录", "file_index": 60, "url": "https://mumbai-edge.smartplaytv.in/LoveNature/index.m3u8"},
+    {"app_index": 100, "seq": 101, "name": "Wonder", "group": "纪录", "file_index": 65, "url": "https://lds-wonder-rakuten.amagi.tv/playlist.m3u8"},
+    {"app_index": 101, "seq": 102, "name": "NatureTime", "group": "纪录", "file_index": 66, "url": "https://bamusa-naturetime-emea-eng-rakuten.amagi.tv/playlist.m3u8"},
+    {"app_index": 102, "seq": 103, "name": "History Hit", "group": "纪录", "file_index": 91, "url": "https://lds-timeline-rakuten.amagi.tv/playlist.m3u8"},
+    {"app_index": 103, "seq": 104, "name": "金鹰卡通", "group": "少儿", "file_index": 103, "url": "http://101.66.198.18:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=0&authid=0"}
+  ]
+};
+
+const channels = rawData.channels.map((c) => {
+  const urlParts = c.url.split(';').map((s) => s.trim()).filter(Boolean);
+  const primaryUrl = urlParts[0];
+  const is1080 = /1080/i.test(c.name) || /1080/i.test(primaryUrl);
+  const is720 = /720|hd/i.test(c.name) || /720|hd/i.test(primaryUrl);
+  const resolution = is1080 ? '1080P' : is720 ? '720P' : '高清';
+  const height = is1080 ? 1080 : 720;
+
+  return {
+    name: c.name,
+    id: `ch_${c.seq}_${c.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}`,
+    group: c.group,
+    url: primaryUrl,
+    lines: urlParts,
+    resolution,
+    height,
+    seq: c.seq,
+    source: rawData.source.name
+  };
+});
+
+const outPath = path.resolve('src/data/defaultChannels.json');
+fs.writeFileSync(outPath, JSON.stringify(channels, null, 2), 'utf-8');
+console.log(`Generated ${channels.length} channels to ${outPath}`);

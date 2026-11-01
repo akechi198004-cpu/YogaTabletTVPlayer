@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape-first layout. MainActivity re-arranges it for portrait at runtime. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_root"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:descendantFocusability="beforeDescendants"
+    android:orientation="vertical">
+
+    <!-- ======================= header ======================= -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/bg_panel"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="12dp"
+        android:paddingRight="10dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_tv"
+            android:contentDescription="@string/app_name" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="7dp"
+            android:text="@string/app_name"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/header_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:background="@drawable/bg_badge"
+            android:text="极速直播 · 360-720P"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/header_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:gravity="center_vertical"
+            android:text="共 0 频道"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+
+        <ImageView
+            android:id="@+id/btn_test_all"
+            style="@style/WidgetBarBtn"
+            android:layout_marginRight="6dp"
+            android:src="@drawable/ic_bolt"
+            android:contentDescription="批量测速" />
+
+        <ImageView
+            android:id="@+id/btn_settings"
+            style="@style/WidgetBarBtn"
+            android:src="@drawable/ic_settings"
+            android:contentDescription="设置" />
+    </LinearLayout>
+
+    <!-- ======================= stage: player + channel panel ======================= -->
+    <LinearLayout
+        android:id="@+id/stage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/player_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/black">
+
+            <com.gathin.touchiptv.ui.VideoSurfaceView
+                android:id="@+id/video_surface"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+            <!-- tap target that wakes the controls, kept under the overlay -->
+            <View
+                android:id="@+id/tap_layer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/player_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- top bar -->
+                <LinearLayout
+                    android:id="@+id/overlay_top_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/overlay_top"
+                    android:gravity="center_vertical"
+                    android:minHeight="60dp"
+                    android:orientation="horizontal"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <View
+                        android:id="@+id/live_dot"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/dot_live" />
+
+                    <TextView
+                        android:id="@+id/tv_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:ellipsize="end"
+                        android:maxWidth="260dp"
+                        android:singleLine="true"
+                        android:shadowColor="#B3000000"
+                        android:shadowDx="0"
+                        android:shadowDy="1"
+                        android:shadowRadius="3"
+                        android:text="TouchIPTV 直播"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_res"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:background="@drawable/bg_badge"
+                        android:paddingLeft="6dp"
+                        android:paddingRight="6dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="10sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tv_latency"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:background="@drawable/bg_badge"
+                        android:paddingLeft="6dp"
+                        android:paddingRight="6dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="10sp"
+                        android:visibility="gone" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/btn_fav"
+                        style="@style/WidgetIconBtn"
+                        android:layout_marginRight="6dp"
+                        android:src="@drawable/ic_star"
+                        android:contentDescription="收藏" />
+
+                    <ImageView
+                        android:id="@+id/btn_speed"
+                        style="@style/WidgetIconBtn"
+                        android:layout_marginRight="6dp"
+                        android:src="@drawable/ic_bolt"
+                        android:contentDescription="测速" />
+
+                    <ImageView
+                        android:id="@+id/btn_retry"
+                        style="@style/WidgetIconBtn"
+                        android:src="@drawable/ic_refresh"
+                        android:contentDescription="重新连接" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <com.gathin.touchiptv.ui.SpinnerView
+                        android:id="@+id/progress"
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btn_big_play"
+                        android:layout_width="78dp"
+                        android:layout_height="78dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_circle"
+                        android:contentDescription="播放"
+                        android:padding="21dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_play"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/error_box"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_card"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/error_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="连接失败"
+                            android:textColor="@color/rose"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/error_detail"
+                            android:layout_width="280dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:gravity="center"
+                            android:lineSpacingExtra="3dp"
+                            android:text=""
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/btn_error_retry"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/bg_btn_accent"
+                            android:gravity="center"
+                            android:paddingLeft="20dp"
+                            android:paddingRight="20dp"
+                            android:text="重新连接"
+                            android:textColor="@color/white"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <!-- bottom bar -->
+                <LinearLayout
+                    android:id="@+id/overlay_bottom_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/overlay_bottom"
+                    android:gravity="center_vertical"
+                    android:minHeight="68dp"
+                    android:orientation="horizontal"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:id="@+id/btn_prev"
+                        style="@style/WidgetIconBtn"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/ic_prev"
+                        android:contentDescription="上一个频道" />
+
+                    <ImageView
+                        android:id="@+id/btn_play"
+                        style="@style/WidgetIconBtn"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/ic_pause"
+                        android:contentDescription="暂停" />
+
+                    <ImageView
+                        android:id="@+id/btn_next"
+                        style="@style/WidgetIconBtn"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/ic_next"
+                        android:contentDescription="下一个频道" />
+
+                    <TextView
+                        android:id="@+id/btn_line"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginRight="8dp"
+                        android:background="@drawable/bg_btn"
+                        android:gravity="center"
+                        android:paddingLeft="12dp"
+                        android:paddingRight="12dp"
+                        android:text="线路 1/1"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/btn_volume"
+                        style="@style/WidgetIconBtn"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/ic_volume"
+                        android:contentDescription="静音" />
+
+                    <ImageView
+                        android:id="@+id/btn_aspect"
+                        style="@style/WidgetIconBtn"
+                        android:src="@drawable/ic_aspect"
+                        android:contentDescription="画面比例" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/tv_engine"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginRight="8dp"
+                        android:background="@drawable/bg_btn"
+                        android:gravity="center"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:text="解码：自动"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
+
+                    <ImageView
+                        android:id="@+id/btn_fullscreen"
+                        style="@style/WidgetIconBtn"
+                        android:src="@drawable/ic_fullscreen"
+                        android:contentDescription="全屏" />
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- ======================= channel panel ======================= -->
+        <LinearLayout
+            android:id="@+id/panel"
+            android:layout_width="308dp"
+            android:layout_height="match_parent"
+            android:background="@color/bg_panel"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="12dp"
+                android:paddingRight="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="频道列表"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/panel_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dp"
+                    android:text="0"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="11sp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/btn_refresh"
+                    style="@style/WidgetBarBtn"
+                    android:layout_marginRight="6dp"
+                    android:src="@drawable/ic_refresh"
+                    android:contentDescription="刷新频道列表" />
+
+                <ImageView
+                    android:id="@+id/btn_collapse"
+                    style="@style/WidgetBarBtn"
+                    android:src="@drawable/ic_list"
+                    android:contentDescription="收起频道列表"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_search"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingRight="6dp">
+
+                <ImageView
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="搜索" />
+
+                <EditText
+                    android:id="@+id/input_search"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="7dp"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="搜索频道 / 分类 / 画质"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:paddingBottom="0dp"
+                    android:paddingTop="0dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_tertiary"
+                    android:textSize="13sp" />
+
+                <ImageView
+                    android:id="@+id/btn_clear_search"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:padding="7dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_close"
+                    android:contentDescription="清除"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="8dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/chip_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/line" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <ListView
+                    android:id="@+id/channel_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:cacheColorHint="@android:color/transparent"
+                    android:divider="@null"
+                    android:drawSelectorOnTop="false"
+                    android:fadeScrollbars="true"
+                    android:fastScrollEnabled="false"
+                    android:listSelector="@android:color/transparent"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:scrollbarStyle="outsideOverlay"
+                    android:scrollingCache="true" />
+
+                <TextView
+                    android:id="@+id/empty_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:text="没有匹配的频道\n试试切换分类或清空搜索"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ======================= notice bar ======================= -->
+    <TextView
+        android:id="@+id/notice_bar"
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:background="#FF12151A"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:singleLine="true"
+        android:text="已就绪"
+        android:textColor="@color/text_secondary"
+        android:textSize="11sp" />
+
+</LinearLayout>

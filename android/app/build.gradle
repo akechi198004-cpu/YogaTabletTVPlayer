@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.gathin.touchiptv'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.gathin.touchiptv'
+        minSdk 19
+        targetSdk 28
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Sideloaded over ADB only: sign with the debug key so it installs over a debug build.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        // No core-library desugaring: it would force legacy multidex on API 19 for no real gain here.
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        encoding 'UTF-8'
+    }
+
+    lint {
+        // minSdk 19 is intentional; the usual "use a newer API" advice does not apply to a frozen 4.4.2 tablet.
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.7'
+    implementation 'com.google.android.exoplayer:exoplayer-hls:2.18.7'
+}

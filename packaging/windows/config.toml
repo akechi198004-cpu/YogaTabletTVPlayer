@@ -1,0 +1,16 @@
+# TouchIPTV 直播桌面版 · 便携配置
+# 首次运行可保持 vlc_path 为空，程序会自动探测 VLC。
+
+vlc_path = ""
+last_channel_key = ""
+last_filter = "全部"
+favorites = []
+custom_source_url = ""
+fullscreen = true
+use_playlist = true
+network_caching_ms = 1500
+disable_hw_decode = false
+ad_guard = true
+auto_play_last = false
+user_agent = ""
+referer = ""

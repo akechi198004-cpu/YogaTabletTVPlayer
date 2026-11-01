@@ -1,0 +1,9 @@
+/target/
+/config.toml
+/custom_source.m3u
+/cache/
+/.local/
+/.idea/
+/tv-code-*.zip
+/dist/touchiptv-desktop-win32/
+/dist/touchiptv-desktop-win32.zip

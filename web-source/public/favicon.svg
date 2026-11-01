@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="40%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Border Rim Glow -->
+    <linearGradient id="rimGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0.7" />
+    </linearGradient>
+
+    <!-- Screen Bezel -->
+    <linearGradient id="bezelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+
+    <!-- Screen Inner Display -->
+    <linearGradient id="displayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a192f" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+
+    <!-- Play Button Gradient -->
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#2dd4bf" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <!-- Glossy Reflection -->
+    <linearGradient id="glossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <!-- ChromeOS Squircle Background Container -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)" stroke="url(#rimGlow)" stroke-width="4" />
+
+  <!-- Subtle Top Glass Sheen -->
+  <path d="M 32 140 C 130 65, 382 65, 480 140 A 112 112 0 0 0 400 32 L 112 32 A 112 112 0 0 0 32 140 Z" fill="url(#glossGrad)" />
+
+  <!-- Television Outer Frame -->
+  <rect x="76" y="104" width="360" height="252" rx="36" fill="url(#bezelGrad)" stroke="#475569" stroke-width="3" />
+
+  <!-- Television Screen Glass Area -->
+  <rect x="92" y="120" width="328" height="220" rx="26" fill="url(#displayGrad)" stroke="#1e293b" stroke-width="2" />
+
+  <!-- Live Broadcast Waves (Top Right) -->
+  <path d="M 368 164 A 28 28 0 0 0 340 136" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" />
+  <path d="M 384 172 A 44 44 0 0 0 336 124" fill="none" stroke="#2dd4bf" stroke-width="4.5" stroke-linecap="round" opacity="0.75" />
+  <path d="M 400 180 A 60 60 0 0 0 332 112" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" opacity="0.5" />
+
+  <!-- Stand Leg & Foot -->
+  <path d="M 216 356 L 296 356 L 312 396 L 200 396 Z" fill="#334155" />
+  <rect x="164" y="394" width="184" height="14" rx="7" fill="#475569" stroke="#64748b" stroke-width="1.5" />
+
+  <!-- Center Glowing Play Triangle -->
+  <polygon points="232,184 322,230 232,276" fill="url(#playGrad)" />
+
+  <!-- Touch Ripple Indicator (Bottom Right) -->
+  <circle cx="368" cy="296" r="22" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0.35" />
+  <circle cx="368" cy="296" r="14" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.7" />
+  <circle cx="368" cy="296" r="6" fill="#38bdf8" />
+
+  <!-- Live Status Dot (Top Left of Screen) -->
+  <circle cx="124" cy="150" r="7" fill="#10b981" />
+  <circle cx="124" cy="150" r="3.5" fill="#ecfdf5" />
+
+  <!-- Bottom Quality Pill -->
+  <rect x="96" y="424" width="136" height="34" rx="10" fill="#0f172a" stroke="#0284c7" stroke-width="2" />
+  <text x="164" y="447" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="800" text-anchor="middle" letter-spacing="1">360-720P</text>
+
+  <!-- Bottom Speed Pill -->
+  <rect x="280" y="424" width="136" height="34" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2" />
+  <text x="348" y="447" fill="#34d399" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="800" text-anchor="middle" letter-spacing="1">⚡ 极速优选</text>
+</svg>

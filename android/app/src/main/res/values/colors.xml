@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Iron theme palette (ported from the web app's default "铁灰" look) -->
+    <color name="bg_root">#FF181A1D</color>
+    <color name="bg_panel">#FF1B1E23</color>
+    <color name="bg_panel_alt">#FF14171A</color>
+    <color name="bg_elevated">#FF242930</color>
+    <color name="line">#FF292F38</color>
+    <color name="line_strong">#FF343B46</color>
+
+    <color name="accent">#FF38BDF8</color>
+    <color name="accent_deep">#FF0284C7</color>
+    <color name="accent_soft">#3338BDF8</color>
+    <color name="amber">#FFF59E0B</color>
+    <color name="emerald">#FF34D399</color>
+    <color name="rose">#FFF43F5E</color>
+
+    <color name="text_primary">#FFF8FAFC</color>
+    <color name="text_secondary">#FF94A3B8</color>
+    <color name="text_tertiary">#FF64748B</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

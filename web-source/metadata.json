@@ -1,0 +1,8 @@
+{
+  "name": "TouchIPTV · 极速直播 (360-720P优选版)",
+  "description": "专为触屏与桌面优化的轻享 IPTV 电视直播系统，预置实测低延迟 360P-720P 极速优质频道源，支持 HLS 流畅播放、全屏退出保护、备用线路切换与在线测速。",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

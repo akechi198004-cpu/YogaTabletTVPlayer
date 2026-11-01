@@ -1,0 +1,1355 @@
+[
+  {
+    "name": "CCTV-1 综合",
+    "id": "ch_1_CCTV_1_综合",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv1hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv1hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 1,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-2 财经",
+    "id": "ch_2_CCTV_2_财经",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv2hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv2hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 2,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-3 综艺",
+    "id": "ch_3_CCTV_3_综艺",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv3hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv3hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 3,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-4 中文国际",
+    "id": "ch_4_CCTV_4_中文国际",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv4hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv4hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 4,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-5 体育",
+    "id": "ch_5_CCTV_5_体育",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv5hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv5hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 5,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-6 电影",
+    "id": "ch_6_CCTV_6_电影",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv6hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv6hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 6,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-7 国防军事",
+    "id": "ch_7_CCTV_7_国防军事",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv7hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv7hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 7,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-8 电视剧",
+    "id": "ch_8_CCTV_8_电视剧",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv8hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv8hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 8,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-9 纪录",
+    "id": "ch_9_CCTV_9_纪录",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv9hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv9hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 9,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-10 科教",
+    "id": "ch_10_CCTV_10_科教",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv10hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv10hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 10,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-11 戏曲",
+    "id": "ch_11_CCTV_11_戏曲",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv11hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv11hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 11,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-12 社会与法",
+    "id": "ch_12_CCTV_12_社会与法",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv12hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv12hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 12,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-13 新闻",
+    "id": "ch_13_CCTV_13_新闻",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv13hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv13hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 13,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-14 少儿",
+    "id": "ch_14_CCTV_14_少儿",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv14hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv14hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 14,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-15 音乐",
+    "id": "ch_15_CCTV_15_音乐",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv15hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv15hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 15,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-17 农业农村",
+    "id": "ch_16_CCTV_17_农业农村",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/cctv17hd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cctv17hd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 16,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-16 奥林匹克",
+    "id": "ch_17_CCTV_16_奥林匹克",
+    "group": "央视",
+    "url": "http://gmxw.7766.org:808/hls/169/index.m3u8",
+    "lines": [
+      "http://gmxw.7766.org:808/hls/169/index.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 17,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-World Geography",
+    "id": "ch_18_CCTV_World_Geography",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/sjdl.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/sjdl.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 18,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-兵器科技",
+    "id": "ch_19_CCTV_兵器科技",
+    "group": "央视",
+    "url": "http://38.75.136.137:98/gslb/dsdqpub/gfjs.m3u8?auth=testpub",
+    "lines": [
+      "http://38.75.136.137:98/gslb/dsdqpub/gfjs.m3u8?auth=testpub"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 19,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "风云剧场",
+    "id": "ch_20_风云剧场",
+    "group": "央视",
+    "url": "http://173.208.212.130:8181/720p/fyjc.m3u8",
+    "lines": [
+      "http://173.208.212.130:8181/720p/fyjc.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 20,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CHC动作电影",
+    "id": "ch_21_CHC动作电影",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/chcdz.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/chcdz.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 21,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CHC家庭影院",
+    "id": "ch_22_CHC家庭影院",
+    "group": "央视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=chcjt",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=chcjt"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 22,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "第一剧场",
+    "id": "ch_23_第一剧场",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/dyjc.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/dyjc.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 23,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "文化精品",
+    "id": "ch_24_文化精品",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/ysjp.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/ysjp.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 24,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "央视台球",
+    "id": "ch_25_央视台球",
+    "group": "央视",
+    "url": "http://107.150.60.122/live/ystq.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/ystq.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 25,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "风云足球",
+    "id": "ch_26_风云足球",
+    "group": "央视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=fyzq",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=fyzq"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 26,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "风云音乐",
+    "id": "ch_27_风云音乐",
+    "group": "央视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=fyyy",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=fyyy"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 27,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CCTV-5+ 体育赛事",
+    "id": "ch_28_CCTV_5__体育赛事",
+    "group": "央视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv5p",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv5p"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 28,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "东方卫视",
+    "id": "ch_29_东方卫视",
+    "group": "卫视",
+    "url": "https://bp-resource-dfl.bestv.cn/148/3/video.m3u8",
+    "lines": [
+      "https://bp-resource-dfl.bestv.cn/148/3/video.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 29,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "浙江卫视",
+    "id": "ch_30_浙江卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/zjwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/zjwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 30,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "江苏卫视",
+    "id": "ch_31_江苏卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/jswshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/jswshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 31,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "深圳卫视",
+    "id": "ch_32_深圳卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/szwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/szwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 32,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "江西卫视",
+    "id": "ch_33_江西卫视",
+    "group": "卫视",
+    "url": "http://112.27.5.218:9901/tsfile/live/faacts/0138_1.m3u8?key=txiptv&playlive=1&authid=0",
+    "lines": [
+      "http://112.27.5.218:9901/tsfile/live/faacts/0138_1.m3u8?key=txiptv&playlive=1&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 33,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "河北卫视",
+    "id": "ch_34_河北卫视",
+    "group": "卫视",
+    "url": "http://event.pull.hebtv.com/jishi/weishi_tingyun.m3u8",
+    "lines": [
+      "http://event.pull.hebtv.com/jishi/weishi_tingyun.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 34,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "新疆卫视",
+    "id": "ch_35_新疆卫视",
+    "group": "卫视",
+    "url": "http://218.84.12.186:8001/hls/main/playlist.m3u8?zxinjd",
+    "lines": [
+      "http://218.84.12.186:8001/hls/main/playlist.m3u8?zxinjd",
+      "http://218.84.12.186:8001/hls/main/playlist.m3u8zxinjd"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 35,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "广东卫视",
+    "id": "ch_36_广东卫视",
+    "group": "卫视",
+    "url": "http://38.75.136.137:98/gslb/dsdqpub/gdwshd.m3u8?auth=testpub",
+    "lines": [
+      "http://38.75.136.137:98/gslb/dsdqpub/gdwshd.m3u8?auth=testpub"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 36,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "湖南卫视",
+    "id": "ch_37_湖南卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/hnwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/hnwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 37,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "贵州卫视",
+    "id": "ch_38_贵州卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/gzwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/gzwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 38,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "陕西卫视",
+    "id": "ch_39_陕西卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/snwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/snwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 39,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "宁夏卫视",
+    "id": "ch_40_宁夏卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/nxws.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/nxws.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 40,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "四川卫视",
+    "id": "ch_41_四川卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/scwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/scwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 41,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "湖北卫视",
+    "id": "ch_42_湖北卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/hbwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/hbwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 42,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "厦门卫视",
+    "id": "ch_43_厦门卫视",
+    "group": "卫视",
+    "url": "http://192.151.150.154/live/xmws.m3u8",
+    "lines": [
+      "http://192.151.150.154/live/xmws.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 43,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "山西卫视",
+    "id": "ch_44_山西卫视",
+    "group": "卫视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sxwshd",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sxwshd"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 44,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "西藏卫视",
+    "id": "ch_45_西藏卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/xzws.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/xzws.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 45,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "安徽卫视",
+    "id": "ch_46_安徽卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/ahwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/ahwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 46,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "山东卫视",
+    "id": "ch_47_山东卫视",
+    "group": "卫视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sdwshd",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=sdwshd"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 47,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "重庆卫视",
+    "id": "ch_48_重庆卫视",
+    "group": "卫视",
+    "url": "http://107.150.60.122/live/cqwshd.m3u8",
+    "lines": [
+      "http://107.150.60.122/live/cqwshd.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 48,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "北京卫视",
+    "id": "ch_49_北京卫视",
+    "group": "卫视",
+    "url": "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=bjwshd",
+    "lines": [
+      "http://63.141.230.178:82/gslb/zbdq5.m3u8?id=bjwshd"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 49,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "广东体育",
+    "id": "ch_50_广东体育",
+    "group": "卫视",
+    "url": "https://epg.pw/stream/7b470f9fc5c305db0c8622117b7b25ca00eb35ba3e93e865cf0ff9df5c736681.m3u8",
+    "lines": [
+      "https://epg.pw/stream/7b470f9fc5c305db0c8622117b7b25ca00eb35ba3e93e865cf0ff9df5c736681.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 50,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "东南卫视",
+    "id": "ch_51_东南卫视",
+    "group": "卫视",
+    "url": "http://101.66.198.18:9901/tsfile/live/0137_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/0137_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 51,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "天津卫视",
+    "id": "ch_52_天津卫视",
+    "group": "卫视",
+    "url": "http://125.93.74.27:9002/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0",
+    "lines": [
+      "http://125.93.74.27:9002/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 52,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "河南卫视",
+    "id": "ch_53_河南卫视",
+    "group": "卫视",
+    "url": "http://101.66.198.18:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 53,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "海南卫视",
+    "id": "ch_54_海南卫视",
+    "group": "卫视",
+    "url": "http://125.93.74.27:9002/tsfile/live/0109_1.m3u8?key=txiptv&playlive=1&authid=0",
+    "lines": [
+      "http://125.93.74.27:9002/tsfile/live/0109_1.m3u8?key=txiptv&playlive=1&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 54,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "黑龙江卫视",
+    "id": "ch_55_黑龙江卫视",
+    "group": "卫视",
+    "url": "http://101.66.198.18:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 55,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "云南卫视",
+    "id": "ch_56_云南卫视",
+    "group": "卫视",
+    "url": "http://101.66.198.18:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 56,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "吉林卫视",
+    "id": "ch_57_吉林卫视",
+    "group": "卫视",
+    "url": "http://101.66.198.18:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/0116_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 57,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "广西卫视",
+    "id": "ch_58_广西卫视",
+    "group": "卫视",
+    "url": "http://101.66.198.18:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 58,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "青海卫视",
+    "id": "ch_59_青海卫视",
+    "group": "卫视",
+    "url": "http://125.93.74.27:9002/tsfile/live/0140_2.m3u8?key=txiptv&playlive=1&authid=0",
+    "lines": [
+      "http://125.93.74.27:9002/tsfile/live/0140_2.m3u8?key=txiptv&playlive=1&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 59,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "苏州新闻综合",
+    "id": "ch_60_苏州新闻综合",
+    "group": "苏州",
+    "url": "https://live-auth.51kandianshi.com/szgd/csztv1.m3u8",
+    "lines": [
+      "https://live-auth.51kandianshi.com/szgd/csztv1.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 60,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "苏州社会经济",
+    "id": "ch_61_苏州社会经济",
+    "group": "苏州",
+    "url": "https://live-auth.51kandianshi.com/szgd/csztv2.m3u8",
+    "lines": [
+      "https://live-auth.51kandianshi.com/szgd/csztv2.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 61,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "苏州文化生活",
+    "id": "ch_62_苏州文化生活",
+    "group": "苏州",
+    "url": "https://live-auth.51kandianshi.com/szgd/csztv3.m3u8",
+    "lines": [
+      "https://live-auth.51kandianshi.com/szgd/csztv3.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 62,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "苏州生活资讯",
+    "id": "ch_63_苏州生活资讯",
+    "group": "苏州",
+    "url": "https://live-auth.51kandianshi.com/szgd/csztv5.m3u8",
+    "lines": [
+      "https://live-auth.51kandianshi.com/szgd/csztv5.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 63,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "TVB翡翠台",
+    "id": "ch_64_TVB翡翠台",
+    "group": "香港",
+    "url": "http://103.172.187.30:12000/stream/mytv/null-1/master.m3u8",
+    "lines": [
+      "http://103.172.187.30:12000/stream/mytv/null-1/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 64,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "TVB经典台",
+    "id": "ch_65_TVB经典台",
+    "group": "香港",
+    "url": "http://103.172.187.30:12000/stream/mytv/null-12/master.m3u8",
+    "lines": [
+      "http://103.172.187.30:12000/stream/mytv/null-12/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 65,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "黄金华剧台",
+    "id": "ch_66_黄金华剧台",
+    "group": "香港",
+    "url": "http://103.172.187.30:12000/stream/mytv/null-8/master.m3u8",
+    "lines": [
+      "http://103.172.187.30:12000/stream/mytv/null-8/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 66,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "美亚电影台",
+    "id": "ch_67_美亚电影台",
+    "group": "香港",
+    "url": "http://103.172.187.30:12000/stream/mytv/null-2/master.m3u8",
+    "lines": [
+      "http://103.172.187.30:12000/stream/mytv/null-2/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 67,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "中国电影频道",
+    "id": "ch_68_中国电影频道",
+    "group": "香港",
+    "url": "http://103.172.187.30:12000/stream/mytv/null-3/master.m3u8",
+    "lines": [
+      "http://103.172.187.30:12000/stream/mytv/null-3/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 68,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "凤凰中文",
+    "id": "ch_69_凤凰中文",
+    "group": "香港",
+    "url": "http://43.152.224.209/qctv.fengshows.cn/live/0701pcc72.flv",
+    "lines": [
+      "http://43.152.224.209/qctv.fengshows.cn/live/0701pcc72.flv"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 69,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "凤凰资讯",
+    "id": "ch_70_凤凰资讯",
+    "group": "香港",
+    "url": "http://43.152.224.209/qctv.fengshows.cn/live/0701pin72.flv",
+    "lines": [
+      "http://43.152.224.209/qctv.fengshows.cn/live/0701pin72.flv"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 70,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "凤凰香港",
+    "id": "ch_71_凤凰香港",
+    "group": "香港",
+    "url": "http://43.152.224.209/qctv.fengshows.cn/live/0701phk72.flv",
+    "lines": [
+      "http://43.152.224.209/qctv.fengshows.cn/live/0701phk72.flv"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 71,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "大立电视",
+    "id": "ch_72_大立电视",
+    "group": "台湾",
+    "url": "http://www.dalitv.com.tw:4568/live/dali/index.m3u8",
+    "lines": [
+      "http://www.dalitv.com.tw:4568/live/dali/index.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 72,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "人间卫视",
+    "id": "ch_73_人间卫视",
+    "group": "台湾",
+    "url": "http://61.216.67.119:1935/bltvhd/bltv1/chunklist_w1266569526.m3u8",
+    "lines": [
+      "http://61.216.67.119:1935/bltvhd/bltv1/chunklist_w1266569526.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 73,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "TVBS亚洲",
+    "id": "ch_74_TVBS亚洲",
+    "group": "台湾",
+    "url": "http://38.64.72.148/hls/modn/list/4005/chunklist0.m3u8",
+    "lines": [
+      "http://38.64.72.148/hls/modn/list/4005/chunklist0.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 74,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "NHK World",
+    "id": "ch_75_NHK_World",
+    "group": "日本",
+    "url": "https://masterpl.hls.nhkworld.jp/hls/w/live/smarttv.m3u8",
+    "lines": [
+      "https://masterpl.hls.nhkworld.jp/hls/w/live/smarttv.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 75,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "日本电视台NEWS",
+    "id": "ch_76_日本电视台NEWS",
+    "group": "日本",
+    "url": "https://cdn-apne1.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-news1hlscmaf-rakutenjp/playlist.m3u8",
+    "lines": [
+      "https://cdn-apne1.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-news1hlscmaf-rakutenjp/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 76,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "MBS新闻",
+    "id": "ch_77_MBS新闻",
+    "group": "日本",
+    "url": "https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-news5-cmaf-rakutenjp/playlist.m3u8",
+    "lines": [
+      "https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-news5-cmaf-rakutenjp/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 77,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Weathernews",
+    "id": "ch_78_Weathernews",
+    "group": "日本",
+    "url": "https://rch01e-alive-hls.akamaized.net/38fb45b25cdb05a1/out/v1/4e907bfabc684a1dae10df8431a84d21/index.m3u8",
+    "lines": [
+      "https://rch01e-alive-hls.akamaized.net/38fb45b25cdb05a1/out/v1/4e907bfabc684a1dae10df8431a84d21/index.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 78,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "NHK World Premium",
+    "id": "ch_79_NHK_World_Premium",
+    "group": "日本",
+    "url": "https://media-tyo.hls.nhkworld.jp/hls/wp/live/master.m3u8",
+    "lines": [
+      "https://media-tyo.hls.nhkworld.jp/hls/wp/live/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 79,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CNN",
+    "id": "ch_80_CNN",
+    "group": "国际",
+    "url": "https://d3bp6dwmpbdajl.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-ury0meh5m4nzm/index.m3u8",
+    "lines": [
+      "https://d3bp6dwmpbdajl.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-ury0meh5m4nzm/index.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 80,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "LiveNOW from FOX",
+    "id": "ch_81_LiveNOW_from_FOX",
+    "group": "国际",
+    "url": "https://fox-foxnewsnow-vizio.amagi.tv/playlist.m3u8",
+    "lines": [
+      "https://fox-foxnewsnow-vizio.amagi.tv/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 81,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "BBC News",
+    "id": "ch_82_BBC_News",
+    "group": "国际",
+    "url": "https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/t=3840/v=pv14/b=5070016/main.m3u8",
+    "lines": [
+      "https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/t=3840/v=pv14/b=5070016/main.m3u8"
+    ],
+    "resolution": "720P",
+    "height": 720,
+    "seq": 82,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CNA",
+    "id": "ch_83_CNA",
+    "group": "国际",
+    "url": "https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8",
+    "lines": [
+      "https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 83,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "NBC News NOW",
+    "id": "ch_84_NBC_News_NOW",
+    "group": "国际",
+    "url": "https://d1si3n1st4nkgb.cloudfront.net/10502/88896001/hls/master.m3u8?ads.xumo_channelId=88896001",
+    "lines": [
+      "https://d1si3n1st4nkgb.cloudfront.net/10502/88896001/hls/master.m3u8?ads.xumo_channelId=88896001"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 84,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "DW English",
+    "id": "ch_85_DW_English",
+    "group": "国际",
+    "url": "https://amg01644-amg01644c1-amgplt0343.playout.now3.amagi.tv/ts-eu-w1-n2/playlist/amg01644-amg01644c1-amgplt0343/playlist.m3u8",
+    "lines": [
+      "https://amg01644-amg01644c1-amgplt0343.playout.now3.amagi.tv/ts-eu-w1-n2/playlist/amg01644-amg01644c1-amgplt0343/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 85,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CNBC UK",
+    "id": "ch_86_CNBC_UK",
+    "group": "国际",
+    "url": "https://amg01079-nbcuuk-amg01079c2-samsung-gb-1258.playouts.now.amagi.tv/playlist.m3u8",
+    "lines": [
+      "https://amg01079-nbcuuk-amg01079c2-samsung-gb-1258.playouts.now.amagi.tv/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 86,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Sky News Extra 1",
+    "id": "ch_87_Sky_News_Extra_1",
+    "group": "国际",
+    "url": "https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8",
+    "lines": [
+      "https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 87,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Scripps News",
+    "id": "ch_88_Scripps_News",
+    "group": "国际",
+    "url": "https://aegis-cloudfront-1.tubi.video/7e1c26b7-7975-4240-9a4f-480eaa8f3ea4/playlist.m3u8",
+    "lines": [
+      "https://aegis-cloudfront-1.tubi.video/7e1c26b7-7975-4240-9a4f-480eaa8f3ea4/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 88,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "TV BRICS 中文",
+    "id": "ch_89_TV_BRICS_中文",
+    "group": "国际",
+    "url": "https://chibrics.mediacdn.ru/cdn/brics/chinese/playlist.m3u8",
+    "lines": [
+      "https://chibrics.mediacdn.ru/cdn/brics/chinese/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 89,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "NewsWorld",
+    "id": "ch_90_NewsWorld",
+    "group": "国际",
+    "url": "https://amg01076-lightning-amg01076c5-rakuten-us-1788.playouts.now.amagi.tv/playlist/amg01076-lightning-newsworld-rakutenus/playlist.m3u8",
+    "lines": [
+      "https://amg01076-lightning-amg01076c5-rakuten-us-1788.playouts.now.amagi.tv/playlist/amg01076-lightning-newsworld-rakutenus/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 90,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "OAN Plus",
+    "id": "ch_91_OAN_Plus",
+    "group": "国际",
+    "url": "https://oan-plus-tcl.amagi.tv/playlist.m3u8",
+    "lines": [
+      "https://oan-plus-tcl.amagi.tv/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 91,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Reuters TV",
+    "id": "ch_92_Reuters_TV",
+    "group": "国际",
+    "url": "https://amg00453-reuters-amg00453c1-rakuten-uk-2110.playouts.now.amagi.tv/playlist/amg00453-reuters-reuters-rakutenuk/playlist.m3u8",
+    "lines": [
+      "https://amg00453-reuters-amg00453c1-rakuten-uk-2110.playouts.now.amagi.tv/playlist/amg00453-reuters-reuters-rakutenuk/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 92,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "USA TODAY",
+    "id": "ch_93_USA_TODAY",
+    "group": "国际",
+    "url": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg00731-gannettcoinc-usatodaynews-plex/playlist.m3u8",
+    "lines": [
+      "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg00731-gannettcoinc-usatodaynews-plex/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 93,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "半岛电视台英语",
+    "id": "ch_94_半岛电视台英语",
+    "group": "国际",
+    "url": "https://live-hls-apps-aje-fa.getaj.net/AJE/index.m3u8",
+    "lines": [
+      "https://live-hls-apps-aje-fa.getaj.net/AJE/index.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 94,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "NBC Sports NOW",
+    "id": "ch_95_NBC_Sports_NOW",
+    "group": "国际",
+    "url": "https://d4whmvwm0rdvi.cloudfront.net/10007/99993008/hls/master.m3u8?ads.xumo_channelId=99993008",
+    "lines": [
+      "https://d4whmvwm0rdvi.cloudfront.net/10007/99993008/hls/master.m3u8?ads.xumo_channelId=99993008"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 95,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Wild Earth",
+    "id": "ch_96_Wild_Earth",
+    "group": "纪录",
+    "url": "https://wildearth-plex.amagi.tv/masterR1080p.m3u8",
+    "lines": [
+      "https://wildearth-plex.amagi.tv/masterR1080p.m3u8"
+    ],
+    "resolution": "1080P",
+    "height": 1080,
+    "seq": 96,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "CGTN Documentary",
+    "id": "ch_97_CGTN_Documentary",
+    "group": "纪录",
+    "url": "https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8",
+    "lines": [
+      "https://amg00405-rakutentv-cgtndocumentary-rakuten-0ql8j.amagi.tv/master.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 97,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "BBC Earth",
+    "id": "ch_98_BBC_Earth",
+    "group": "纪录",
+    "url": "https://amg00793-amg00793c6-xumo-us-2669.playouts.now.amagi.tv/BBCStudios-BBCEarthA-hls/playlist.m3u8",
+    "lines": [
+      "https://amg00793-amg00793c6-xumo-us-2669.playouts.now.amagi.tv/BBCStudios-BBCEarthA-hls/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 98,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Documentary+",
+    "id": "ch_99_Documentary_",
+    "group": "纪录",
+    "url": "https://ef79b15c8c7c46c7a9de9d33001dbd07.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-859-DOCUMENTARYPLUS-DOCUMENTARYPLUS/mt/documentaryplus/859/hls/master/playlist.m3u8",
+    "lines": [
+      "https://ef79b15c8c7c46c7a9de9d33001dbd07.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-859-DOCUMENTARYPLUS-DOCUMENTARYPLUS/mt/documentaryplus/859/hls/master/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 99,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Love Nature",
+    "id": "ch_100_Love_Nature",
+    "group": "纪录",
+    "url": "https://mumbai-edge.smartplaytv.in/LoveNature/index.m3u8",
+    "lines": [
+      "https://mumbai-edge.smartplaytv.in/LoveNature/index.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 100,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "Wonder",
+    "id": "ch_101_Wonder",
+    "group": "纪录",
+    "url": "https://lds-wonder-rakuten.amagi.tv/playlist.m3u8",
+    "lines": [
+      "https://lds-wonder-rakuten.amagi.tv/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 101,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "NatureTime",
+    "id": "ch_102_NatureTime",
+    "group": "纪录",
+    "url": "https://bamusa-naturetime-emea-eng-rakuten.amagi.tv/playlist.m3u8",
+    "lines": [
+      "https://bamusa-naturetime-emea-eng-rakuten.amagi.tv/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 102,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "History Hit",
+    "id": "ch_103_History_Hit",
+    "group": "纪录",
+    "url": "https://lds-timeline-rakuten.amagi.tv/playlist.m3u8",
+    "lines": [
+      "https://lds-timeline-rakuten.amagi.tv/playlist.m3u8"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 103,
+    "source": "开源组合·全频道"
+  },
+  {
+    "name": "金鹰卡通",
+    "id": "ch_104_金鹰卡通",
+    "group": "少儿",
+    "url": "http://101.66.198.18:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=0&authid=0",
+    "lines": [
+      "http://101.66.198.18:9901/tsfile/live/1000_1.m3u8?key=txiptv&playlive=0&authid=0"
+    ],
+    "resolution": "高清",
+    "height": 720,
+    "seq": 104,
+    "source": "开源组合·全频道"
+  }
+]

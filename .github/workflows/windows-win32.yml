@@ -1,0 +1,55 @@
+name: Windows Win32 Build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  BIN_NAME: touchiptv-desktop
+  TARGET: i686-pc-windows-msvc
+  PACKAGE_NAME: touchiptv-desktop-win32
+
+jobs:
+  build:
+    runs-on: windows-latest
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[deploy]')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ env.TARGET }}
+
+      - name: Cache cargo artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ env.TARGET }}
+
+      - name: Build release binary
+        run: cargo build --release --target $env:TARGET
+
+      - name: Prepare zip package
+        shell: pwsh
+        run: |
+          $packageRoot = "dist/${env:PACKAGE_NAME}"
+          New-Item -ItemType Directory -Force -Path $packageRoot | Out-Null
+          Copy-Item "target/${env:TARGET}/release/${env:BIN_NAME}.exe" "$packageRoot/${env:BIN_NAME}.exe"
+          Copy-Item "DroidSansFallbackFull.ttf" "$packageRoot/DroidSansFallbackFull.ttf"
+          Copy-Item "packaging/windows/config.toml" "$packageRoot/config.toml"
+          Copy-Item "README.md" "$packageRoot/README.md"
+          Copy-Item "LICENSE-RUST" "$packageRoot/LICENSE-RUST"
+          Copy-Item "snap-*.png" "$packageRoot/"
+          Compress-Archive -Path $packageRoot -DestinationPath "dist/${env:PACKAGE_NAME}.zip" -Force
+
+      - name: Upload Win32 zip artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.PACKAGE_NAME }}
+          path: dist/${{ env.PACKAGE_NAME }}.zip

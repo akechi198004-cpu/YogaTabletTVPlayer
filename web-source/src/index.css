@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'LocalWenQuanYi';
+  src: url('/fonts/wqy-microhei.ttc') format('truetype-collection'), url('/fonts/wqy-microhei.ttc') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  font-family: 'WenQuanYi Micro Hei', 'LocalWenQuanYi', 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', system-ui, -apple-system, sans-serif;
+}
+
+body, button, input, textarea, select {
+  font-family: inherit;
+}
+
+/* Touch & Fullscreen fallback styles for Chromebooks and restrictive iframes */
+.fullscreen-fallback {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background-color: #000 !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
