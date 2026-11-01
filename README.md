@@ -14,6 +14,11 @@ A Win32 desktop rewrite of the original Android 4.4 live-TV app in `android/`, a
 内置播放器使用 **mpv i686 Windows 运行时**：mpv 进程通过 `--wid` 把画面渲染到应用自己的 Win32 子窗口，程序通过命名管道 JSON IPC 控制播放、暂停、音量和停止。mpv/FFmpeg 负责 HLS、TS、FLV、常见音视频编码、硬件解码与网络缓冲。
 
 - 内置播放 **不依赖 VLC/libVLC**，用户不需要安装或启动外部 VLC。
+- IPC 使用 overlapped 命名管道，读写真正并发；读取、写入和关闭都支持取消/超时，mpv 无响应时仍能回收。
+- 每条 IPC 事件绑定读取线程创建时的会话号，旧进程迟到的事件会被丢弃；取消未完成请求由后台回收线程持有稳定缓冲区，直到内核确认完成。
+- 换台、停止、失败顺延和全屏重启只向后台工作线程投递命令；旧 mpv 完全释放后才启动新进程，UI 线程不等待进程退出或线程 join。
+- 全屏/退出全屏重启会保留当前暂停状态，并在加载文件前把初始暂停状态传给 mpv，避免短暂播放或出声。
+- 退出应用采用有界清理，并通过 Windows 作业对象在必要时强制终止 mpv，避免残留进程。
 - 发布 ZIP 自带 `mpv\mpv.exe`；源码仓库不提交二进制，GitHub Actions 构建时下载并校验 32 位 mpv。
 - 内置播放失败时只显示错误和「改用 VLC 播放」按钮，**不会静默启动**外部程序。
 - 只有用户选择外部兼容模式或主动点击回退按钮时，才会启动 `vlc.exe`。
@@ -22,6 +27,11 @@ A Win32 desktop rewrite of the original Android 4.4 live-TV app in `android/`, a
 The built-in player uses a **32-bit Windows mpv runtime**. mpv renders into a Win32 child window of the app via `--wid`; playback, pause, volume, and stop are controlled over a named-pipe JSON IPC. mpv/FFmpeg handles HLS, TS, FLV, common codecs, hardware decoding, and network buffering.
 
 - Built-in playback does **not** depend on VLC/libVLC; users do not need to install or launch external VLC.
+- IPC uses an overlapped named pipe with truly concurrent reads/writes; reads, writes, and close support cancellation/timeouts so an unresponsive mpv can still be reclaimed.
+- Every IPC event is bound to the session of its reader thread, so late events from an old process are discarded. Cancelled requests hand their stable buffers to a background reaper until the kernel confirms completion.
+- Channel switches, stop, line failover, and fullscreen restarts only post commands to the background worker. The old mpv is fully released before a new one starts; the UI thread never waits for process exit or thread joins.
+- Fullscreen/exit-fullscreen restarts preserve the current pause state and pass it to mpv before loading the file, preventing brief playback or audio.
+- App exit uses bounded cleanup and a Windows job object to force-terminate mpv when necessary, preventing orphan processes.
 - Release ZIPs bundle `mpv\mpv.exe`. Binaries are not committed; GitHub Actions downloads and verifies the 32-bit mpv build.
 - When built-in playback fails, the app shows an error and a “Use VLC” button. It **never silently launches** an external process.
 - `vlc.exe` starts only when the user selects external compatibility mode or explicitly clicks the fallback button.

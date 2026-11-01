@@ -124,6 +124,9 @@ pub struct TouchIptvApp {
     pub(crate) vlc_fallback: Option<VlcFallback>,
     /// 主窗口 HWND（仅 Windows；用于创建内置播放器视频子窗口）。
     window_hwnd: Option<isize>,
+    /// 应用生命周期内长期持有的内置播放器工作线程。
+    /// 换台、停止、全屏重启只投递命令，清理由后台串行完成。
+    pub(crate) embedded: Option<EmbeddedPlayer>,
     /// 承载内置播放器画面的 Win32 子窗口；跨频道复用。
     pub(crate) video_window: VideoWindow,
     pub(crate) window_fullscreen: bool,
@@ -173,6 +176,19 @@ fn window_handle(cc: &eframe::CreationContext<'_>) -> Option<isize> {
 #[cfg(not(windows))]
 fn window_handle(_cc: &eframe::CreationContext<'_>) -> Option<isize> {
     None
+}
+
+/// 退出时对外部 VLC 做有界等待；普通停止走后台回收线程。
+fn terminate_external_child_bounded(child: &mut std::process::Child, timeout: Duration) {
+    let _ = child.kill();
+    let deadline = Instant::now() + timeout;
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => return,
+            _ if Instant::now() >= deadline => return,
+            _ => std::thread::sleep(Duration::from_millis(20)),
+        }
+    }
 }
 
 /// 选择当前频道下一条尚未尝试的线路。
@@ -245,6 +261,11 @@ impl TouchIptvApp {
             pending_preflight: None,
             vlc_fallback: None,
             window_hwnd,
+            embedded: if embedded::available() {
+                EmbeddedPlayer::new().ok()
+            } else {
+                None
+            },
             video_window: VideoWindow::new(),
             window_fullscreen: false,
             pending_embedded_resize: false,
@@ -685,32 +706,24 @@ impl TouchIptvApp {
             return;
         }
 
-        let player = match EmbeddedPlayer::new() {
-            Ok(player) => player,
-            Err(error) => {
-                self.register_vlc_fallback(
-                    channel,
-                    line_index,
-                    token,
-                    url,
-                    tried_lines,
-                    "内置播放器启动失败",
-                    format!("{error}。可改用外部 VLC 兼容模式。"),
-                );
-                return;
-            }
+        if self.embedded.is_none() {
+            self.embedded = EmbeddedPlayer::new().ok();
+        }
+        let Some(player) = self.embedded.as_ref() else {
+            self.register_vlc_fallback(
+                channel,
+                line_index,
+                token,
+                url,
+                tried_lines,
+                "内置播放器启动失败",
+                "无法创建内置播放器工作线程。可改用外部 VLC 兼容模式。".to_owned(),
+            );
+            return;
         };
         player.set_video_window(self.video_window.hwnd());
         player.set_volume(self.config.embedded_volume);
-        player.load(
-            token,
-            LoadOptions {
-                url: url.clone(),
-                user_agent: self.config.user_agent.clone(),
-                referer: self.config.referer.clone(),
-                disable_hw_decode: self.config.disable_hw_decode,
-            },
-        );
+        player.load(token, self.embedded_load_options(url.clone(), false));
 
         self.playback = Some(PlayingState {
             token,
@@ -719,7 +732,7 @@ impl TouchIptvApp {
             line_index,
             tried_lines,
             url,
-            source: PlaybackSource::Embedded(player),
+            source: PlaybackSource::Embedded,
             paused: false,
             external_fallback: false,
             started_at: Instant::now(),
@@ -865,6 +878,9 @@ impl TouchIptvApp {
         detail: String,
     ) {
         let title = title.into();
+        if let Some(player) = self.embedded.as_ref() {
+            player.stop();
+        }
         self.video_window.hide();
         self.pending_preflight = None;
         self.last_preflight_warning = None;
@@ -1052,17 +1068,45 @@ impl TouchIptvApp {
         self.start_play(key, next, HashSet::new(), ctx);
     }
 
-    /// 结束当前播放并等待资源释放。mpv 正常会立即退出；极端情况下最多等待
-    /// 2 秒，避免旧进程与新频道同时占用视频窗口。
-    /// 关闭应用时使用：等待内置播放器工作线程清理，避免 mpv 残留。
+    /// 关闭应用时使用：有界等待内置播放器清理；外部 VLC 也只等待很短时间。
+    /// 只在 `on_exit` 调用，普通换台/停止不会走这里。
     fn shutdown_playback_blocking(&mut self) {
         if let Some(mut state) = self.playback.take() {
             match &mut state.source {
                 PlaybackSource::External(child) => {
-                    let _ = child.kill();
-                    let _ = child.wait();
+                    terminate_external_child_bounded(child, Duration::from_millis(700));
                 }
-                PlaybackSource::Embedded(player) => player.shutdown(),
+                PlaybackSource::Embedded => {}
+            }
+        }
+        if let Some(mut player) = self.embedded.take() {
+            player.shutdown_blocking(Duration::from_millis(1_500));
+        }
+        self.video_window.hide();
+        if let Some(path) = self.last_playlist_path.take() {
+            let _ = std::fs::remove_file(path);
+        }
+    }
+
+    /// 换台、停止、失败顺延、全屏重启：只投递命令，绝不在 UI 线程等待
+    /// 进程退出或线程 join。内置播放器由后台工作线程串行清理旧会话。
+    fn kill_playback_process(&mut self) {
+        if let Some(state) = self.playback.take() {
+            match state.source {
+                PlaybackSource::External(mut child) => {
+                    // VLC 的 wait 也可能阻塞；交给后台回收线程。
+                    let _ = child.kill();
+                    let _ = std::thread::Builder::new()
+                        .name("vlc-reaper".to_owned())
+                        .spawn(move || {
+                            let _ = child.wait();
+                        });
+                }
+                PlaybackSource::Embedded => {
+                    if let Some(player) = self.embedded.as_ref() {
+                        player.stop();
+                    }
+                }
             }
         }
         self.video_window.hide();
@@ -1071,19 +1115,13 @@ impl TouchIptvApp {
         }
     }
 
-    fn kill_playback_process(&mut self) {
-        if let Some(mut state) = self.playback.take() {
-            match &mut state.source {
-                PlaybackSource::External(child) => {
-                    let _ = child.kill();
-                    let _ = child.wait();
-                }
-                PlaybackSource::Embedded(player) => player.shutdown(),
-            }
-        }
-        self.video_window.hide();
-        if let Some(path) = self.last_playlist_path.take() {
-            let _ = std::fs::remove_file(path);
+    fn embedded_load_options(&self, url: String, start_paused: bool) -> LoadOptions {
+        LoadOptions {
+            url,
+            user_agent: self.config.user_agent.clone(),
+            referer: self.config.referer.clone(),
+            disable_hw_decode: self.config.disable_hw_decode,
+            start_paused,
         }
     }
 
@@ -1101,25 +1139,25 @@ impl TouchIptvApp {
     fn poll_playback(&mut self, ctx: &egui::Context) {
         let mut embedded_events = Vec::new();
         let mut external_exit = None;
+        // 即使当前没有 playback（例如失败后等待回退），也要排空事件队列，
+        // 避免旧会话的迟到事件堆积。
+        if let Some(player) = self.embedded.as_ref() {
+            while let Some(event) = player.try_recv() {
+                embedded_events.push(event);
+            }
+        }
         if let Some(state) = self.playback.as_mut() {
-            match &mut state.source {
-                PlaybackSource::Embedded(player) => {
-                    while let Some(event) = player.try_recv() {
-                        embedded_events.push(event);
-                    }
-                }
-                PlaybackSource::External(child) => {
-                    if let Ok(Some(status)) = child.try_wait() {
-                        external_exit = Some((
-                            status,
-                            state.started_at.elapsed(),
-                            state.channel_key.clone(),
-                            state.channel_name.clone(),
-                            state.line_index,
-                            state.tried_lines.clone(),
-                            state.external_fallback,
-                        ));
-                    }
+            if let PlaybackSource::External(child) = &mut state.source {
+                if let Ok(Some(status)) = child.try_wait() {
+                    external_exit = Some((
+                        status,
+                        state.started_at.elapsed(),
+                        state.channel_key.clone(),
+                        state.channel_name.clone(),
+                        state.line_index,
+                        state.tried_lines.clone(),
+                        state.external_fallback,
+                    ));
                 }
             }
         }
@@ -1185,7 +1223,13 @@ impl TouchIptvApp {
     }
 
     fn handle_embedded_event(&mut self, event: EmbeddedEvent, ctx: &egui::Context) {
-        let current_token = self.playback.as_ref().map(|state| state.token);
+        // 只有当前会话确实是内置播放器时才处理事件；外部 VLC 可能复用
+        // 失败回退时的同一个 token，不能把迟到的 mpv 事件当成 VLC 会话。
+        let current_token = self
+            .playback
+            .as_ref()
+            .filter(|state| state.source.is_embedded())
+            .map(|state| state.token);
         let Some(current_token) = current_token else {
             return;
         };
@@ -1318,6 +1362,9 @@ impl TouchIptvApp {
         let Some(state) = self.playback.take() else {
             return;
         };
+        if let Some(player) = self.embedded.as_ref() {
+            player.stop();
+        }
         self.video_window.hide();
         self.exit_window_fullscreen(ctx);
         self.last_preflight_warning = None;
@@ -1355,19 +1402,25 @@ impl TouchIptvApp {
     }
 
     pub(crate) fn set_embedded_paused(&mut self, paused: bool) {
-        let Some(state) = self.playback.as_mut() else {
+        let Some(state) = self.playback.as_ref() else {
             return;
         };
-        if let PlaybackSource::Embedded(player) = &mut state.source {
-            player.pause(paused);
-            state.paused = paused;
-            self.notice = if paused {
-                format!("已暂停：{}", state.channel_name)
-            } else {
-                format!("继续播放：{}", state.channel_name)
-            };
-            self.notice_error = false;
+        if !state.source.is_embedded() {
+            return;
         }
+        let name = state.channel_name.clone();
+        if let Some(player) = self.embedded.as_ref() {
+            player.pause(paused);
+        }
+        if let Some(state) = self.playback.as_mut() {
+            state.paused = paused;
+        }
+        self.notice = if paused {
+            format!("已暂停：{name}")
+        } else {
+            format!("继续播放：{name}")
+        };
+        self.notice_error = false;
     }
 
     pub(crate) fn toggle_embedded_pause(&mut self) {
@@ -1382,8 +1435,8 @@ impl TouchIptvApp {
     pub(crate) fn set_embedded_volume(&mut self, volume: u8) {
         let volume = volume.min(100);
         self.config.embedded_volume = volume;
-        if let Some(state) = self.playback.as_mut() {
-            if let PlaybackSource::Embedded(player) = &mut state.source {
+        if self.embedded_playing() {
+            if let Some(player) = self.embedded.as_ref() {
                 player.set_volume(volume);
             }
         }
@@ -1398,19 +1451,29 @@ impl TouchIptvApp {
         if !state.source.is_embedded() {
             return;
         }
-        let key = state.channel_key.clone();
-        let line_index = state.line_index;
         let url = state.url.clone();
-        let tried_lines = state.tried_lines.clone();
-        let Some(&index) = self.channel_index.get(&key) else {
+        // 全屏/退出全屏只重建视频输出，不能改变用户当前的暂停状态。
+        let paused = state.paused;
+        let Some(player) = self.embedded.as_ref() else {
             return;
         };
-        let channel = self.channels[index].clone();
-        self.kill_playback_process();
         self.play_seq = self.play_seq.wrapping_add(1);
         let token = self.play_seq;
-        self.launch_embedded_playback(&channel, line_index, token, url, tried_lines);
-        self.notice = "画面尺寸已更新，正在重新连接内置播放器…".to_owned();
+        // 后台工作线程会先释放旧 mpv，再按新的子窗口尺寸启动新进程；
+        // UI 线程只投递命令并更新会话 token。初始暂停状态随 Load 一起传入，
+        // 新进程在加载文件前就保持暂停，避免短暂播放或出声。
+        player.set_video_window(self.video_window.hwnd());
+        player.load(token, self.embedded_load_options(url, paused));
+        if let Some(state) = self.playback.as_mut() {
+            state.token = token;
+            state.paused = paused;
+            state.started_at = Instant::now();
+        }
+        self.notice = if paused {
+            "画面尺寸已更新，保持暂停…".to_owned()
+        } else {
+            "画面尺寸已更新，正在重新连接内置播放器…".to_owned()
+        };
         self.notice_error = false;
         let _ = ctx;
     }
@@ -2081,7 +2144,7 @@ impl eframe::App for TouchIptvApp {
     }
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
-        // 退出时必须结束 mpv 进程/外部 VLC 并销毁视频子窗口。
+        // 退出时做有界清理；内置播放器超时会终止作业对象，避免 mpv 残留。
         self.play_seq = self.play_seq.wrapping_add(1);
         self.shutdown_playback_blocking();
         self.video_window.destroy();
@@ -2207,6 +2270,115 @@ mod tests {
         let mut draft = SettingsDraft::from_config(&app.config);
         draft.vlc_path = vlc.to_string_lossy().into_owned();
         draft
+    }
+
+    #[test]
+    fn fullscreen_restart_preserves_paused_state() {
+        let dir = temp_dir("fullscreen-pause");
+        let config_file = dir.join("config.toml");
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file));
+        let (player, load_rx) = EmbeddedPlayer::new_test_recording();
+        app.embedded = Some(player);
+        app.playback = Some(PlayingState {
+            token: 1,
+            channel_key: "test".to_owned(),
+            channel_name: "测试频道".to_owned(),
+            line_index: 0,
+            tried_lines: HashSet::new(),
+            url: "http://example.com/live.m3u8".to_owned(),
+            source: PlaybackSource::Embedded,
+            paused: true,
+            external_fallback: false,
+            started_at: Instant::now(),
+        });
+        let ctx = egui::Context::default();
+
+        // 暂停 -> 进入全屏 -> 后台重建播放器，必须继续保持暂停。
+        app.toggle_window_fullscreen(&ctx);
+        app.restart_embedded_after_resize(&ctx);
+        let (_, options) = load_rx
+            .recv_timeout(Duration::from_secs(2))
+            .expect("fullscreen restart load");
+        assert!(options.start_paused, "fullscreen restart lost paused state");
+        assert!(app.playback.as_ref().is_some_and(|state| state.paused));
+
+        // 退出全屏再次重建，仍保持暂停。
+        app.toggle_window_fullscreen(&ctx);
+        app.restart_embedded_after_resize(&ctx);
+        let (_, options) = load_rx
+            .recv_timeout(Duration::from_secs(2))
+            .expect("exit-fullscreen restart load");
+        assert!(
+            options.start_paused,
+            "exit-fullscreen restart lost paused state"
+        );
+        assert!(app.playback.as_ref().is_some_and(|state| state.paused));
+
+        // 原本播放中的频道，全屏重建后仍以播放状态启动。
+        if let Some(state) = app.playback.as_mut() {
+            state.paused = false;
+        }
+        app.restart_embedded_after_resize(&ctx);
+        let (_, options) = load_rx
+            .recv_timeout(Duration::from_secs(2))
+            .expect("playing restart load");
+        assert!(
+            !options.start_paused,
+            "playing restart must not stay paused"
+        );
+        assert!(app.playback.as_ref().is_some_and(|state| !state.paused));
+
+        if let Some(mut player) = app.embedded.take() {
+            player.shutdown_fast();
+        }
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn embedded_stop_does_not_wait_for_background_cleanup() {
+        let dir = temp_dir("nonblocking-embedded");
+        let config_file = dir.join("config.toml");
+        let mut app = TouchIptvApp::build(test_paths(&dir, config_file));
+        // 假工作线程对每条命令延迟 450ms，模拟初始化/清理耗时超过 350ms。
+        app.embedded = Some(EmbeddedPlayer::new_test_slow(Duration::from_millis(450)));
+        app.playback = Some(PlayingState {
+            token: 1,
+            channel_key: "test".to_owned(),
+            channel_name: "测试频道".to_owned(),
+            line_index: 0,
+            tried_lines: HashSet::new(),
+            url: "http://example.com/live.m3u8".to_owned(),
+            source: PlaybackSource::Embedded,
+            paused: false,
+            external_fallback: false,
+            started_at: Instant::now(),
+        });
+
+        let start = Instant::now();
+        app.kill_playback_process();
+        assert!(
+            start.elapsed() < Duration::from_millis(100),
+            "stop blocked UI thread: {:?}",
+            start.elapsed()
+        );
+        assert!(app.playback.is_none());
+
+        // 连续停止/换台只投递命令，同样不能等待后台。
+        let start = Instant::now();
+        app.kill_playback_process();
+        if let Some(player) = app.embedded.as_ref() {
+            player.stop();
+        }
+        assert!(
+            start.elapsed() < Duration::from_millis(100),
+            "repeated stop blocked UI thread: {:?}",
+            start.elapsed()
+        );
+
+        if let Some(mut player) = app.embedded.take() {
+            player.shutdown_fast();
+        }
+        let _ = fs::remove_dir_all(dir);
     }
 
     #[test]

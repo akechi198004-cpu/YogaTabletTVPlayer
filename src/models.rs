@@ -3,8 +3,6 @@
 use std::process::Child;
 use std::time::Instant;
 
-use crate::embedded::EmbeddedPlayer;
-
 /// 一次测速的结果状态。
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum LatencyState {
@@ -113,14 +111,17 @@ pub struct PreflightOutcome {
 }
 
 /// 当前播放源：内置 mpv 子窗口，或外部 VLC 进程。
+///
+/// 内置播放器由 `TouchIptvApp::embedded` 长期持有，会话状态只标记来源；
+/// 这样换台/停止时不会在 UI 线程上销毁播放器或等待工作线程。
 pub enum PlaybackSource {
     External(Child),
-    Embedded(EmbeddedPlayer),
+    Embedded,
 }
 
 impl PlaybackSource {
     pub fn is_embedded(&self) -> bool {
-        matches!(self, Self::Embedded(_))
+        matches!(self, Self::Embedded)
     }
 }
 
