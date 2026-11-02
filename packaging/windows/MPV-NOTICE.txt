@@ -4,6 +4,9 @@ TouchIPTV Desktop 内置播放器运行时说明
 本发布包在 mpv\mpv.exe 中包含第三方 mpv 播放器（32 位 Windows 构建），
 用于应用内置播放。mpv 不启动外部 VLC，也不依赖 VLC/libVLC。
 
+mpv.exe 硬导入 vulkan-1.dll；发布包已在 mpv\vulkan-1.dll 附带官方
+Vulkan Loader 1.4.363.0（x86），来源与许可见 VULKAN-NOTICE.txt。
+
 版本：mpv 20261101-git-48fca90e8c（i686）
 构建来源：https://github.com/shinchiro/mpv-winbuild-cmake
 下载地址：https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261101/mpv-i686-20261101-git-48fca90e8c.7z

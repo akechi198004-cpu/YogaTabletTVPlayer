@@ -1,0 +1,31 @@
+TouchIPTV Desktop 内置播放器 Vulkan Loader 说明
+================================================
+
+本发布包在 mpv\vulkan-1.dll 中包含 Vulkan Loader（32 位 x86），
+与 mpv\mpv.exe 位于同一目录。mpv.exe 硬导入 vulkan-1.dll；缺少该文件时
+Windows 会在进程启动阶段直接失败，因此发布包必须自带它。
+
+版本：Vulkan Runtime 1.4.363.0（x86）
+来源：LunarG / Khronos Vulkan Runtime Components（官方发布）
+下载地址：
+https://sdk.lunarg.com/sdk/download/1.4.363.0/windows/vulkan-runtime-components.zip
+ZIP SHA-256：
+a25a927aa8b9f0371048f1861cf88ac3b9bc9b1fb332c42d897c8ab32695769a
+vulkan-1.dll SHA-256：
+70d8ee2377ccdab55ad1aa383c27ae0d98a5f0e1e3fcf5a8d4ae3867d729abad
+
+许可：
+- Vulkan Runtime 由 MIT / Apache 2.0 开源组件组成。
+- 完整许可文本见同目录的 VULKAN-RUNTIME-LICENSE.txt。
+- 上游项目：
+  https://github.com/KhronosGroup/Vulkan-Loader
+
+依赖：
+- 该 x86 vulkan-1.dll 仅依赖 Windows 系统 DLL：
+  CFGMGR32.dll、KERNEL32.dll、ADVAPI32.dll。
+- 不需要用户另行安装 Vulkan Runtime。
+
+渲染策略：
+- 内置播放器显式使用 D3D11 渲染（--gpu-api=d3d11 / --gpu-context=d3d11）。
+- Vulkan Loader 仅用于满足 mpv.exe 的硬导入；不要求显卡支持 Vulkan。
+- 硬件解码仍由随包 mpv/FFmpeg 按 D3D11VA 等可用后端选择。

@@ -540,6 +540,10 @@ fn build_mpv_args(
         "--demuxer-max-back-bytes=4MiB",
         "--network-timeout=15",
         "--background-color=#000000",
+        // 旧平板优先走 D3D11；Vulkan Loader 只是 mpv 的硬依赖，不要求显卡支持 Vulkan。
+        "--vo=gpu",
+        "--gpu-api=d3d11",
+        "--gpu-context=d3d11",
     ]
     .into_iter()
     .map(std::ffi::OsString::from)
@@ -1572,6 +1576,8 @@ mod tests {
         assert!(args.contains(&"--user-agent=TouchIPTV/2.0".to_owned()));
         assert!(args.contains(&"--referrer=http://example.com/".to_owned()));
         assert!(args.contains(&"--volume=70".to_owned()));
+        assert!(args.contains(&"--gpu-api=d3d11".to_owned()));
+        assert!(args.contains(&"--gpu-context=d3d11".to_owned()));
     }
 
     #[test]

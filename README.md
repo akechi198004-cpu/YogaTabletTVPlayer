@@ -109,6 +109,9 @@ Rust · `eframe` / `egui` 0.27 · `reqwest` (blocking + rustls) · `serde` / `to
 |-- assets/channels.json           # 104 个内置频道 / bundled channels
 |-- packaging/windows/config.toml  # 发布包里的便携配置
 |-- packaging/windows/MPV-NOTICE.txt # 随包 mpv 的来源与许可说明
+|-- packaging/windows/VULKAN-NOTICE.txt # 随包 Vulkan Loader 的来源与许可说明
+|-- packaging/windows/VULKAN-RUNTIME-LICENSE.txt # Vulkan Runtime 许可
+|-- packaging/windows/smoke-test.mp4 # Actions 播放冒烟测试视频
 |-- src/
 |   |-- main.rs                    # 入口、字体、配置路径
 |   |-- app.rs                     # 状态、播放会话、后台任务
@@ -139,16 +142,18 @@ Rust · `eframe` / `egui` 0.27 · `reqwest` (blocking + rustls) · `serde` / `to
 - 至少 2 GB 内存
 - OpenGL 2.1 驱动（egui 的 `glow` 后端）。若窗口打不开，先更新显卡驱动
 - **无需安装 VLC**：完整发布包已包含 `mpv\mpv.exe`。不要只复制 exe，需保留 `mpv` 文件夹
+- **无需安装 Vulkan Runtime**：发布包在 `mpv\vulkan-1.dll` 附带官方 32 位 Vulkan Loader。mpv.exe 硬导入该 DLL；默认使用 D3D11 渲染，不要求显卡支持 Vulkan
 - 只有外部 VLC 兼容模式才需要 VLC 3.x；设置里可点「浏览」直接选择 `vlc.exe`，或用「选择安装目录」自动查找
-- 32 位 Windows 必须使用 32 位运行库；随包 mpv 与发布 exe 都是 i686
+- 32 位 Windows 必须使用 32 位运行库；随包 mpv、Vulkan Loader 与发布 exe 都是 i686
 
 **English**
 - Windows 10, 32-bit or 64-bit (the release target is `i686-pc-windows-msvc`; the 32-bit exe also runs on 64-bit Windows; Windows 8/7 are untested)
 - At least 2 GB RAM
 - OpenGL 2.1 drivers (egui `glow` backend). Update the GPU driver if the window fails to open
 - **No VLC installation required**: the complete release ZIP includes `mpv\mpv.exe`. Keep the `mpv` folder next to the exe
+- **No Vulkan Runtime installation required**: the ZIP includes the official 32-bit Vulkan Loader at `mpv\vulkan-1.dll`. `mpv.exe` hard-imports it; rendering defaults to D3D11 and does not require a Vulkan-capable GPU
 - VLC 3.x is needed only for external compatibility mode; Settings can pick `vlc.exe` directly or locate it from an installation folder
-- 32-bit Windows requires 32-bit runtimes; the bundled mpv and the release exe are both i686
+- 32-bit Windows requires 32-bit runtimes; the bundled mpv, Vulkan Loader, and release exe are all i686
 
 ---
 
@@ -393,6 +398,7 @@ For stricter per-channel checks, use the built-in player or disable “external 
 - 外部 VLC 全屏通常打开在主显示器；多屏环境可能需要手动移动窗口
 - 广告预检只覆盖启动前（URL + 清单）；播放中途的请求不经过本程序，详见上一节
 - 若 OpenGL 2.1 驱动不可用，egui 窗口可能无法启动
+- 内置播放默认使用 D3D11 渲染；实际硬件解码能力取决于显卡/驱动，驱动过旧时可能回退到软件解码
 - 内置 104 个频道来自原 Android 工程，可能随时间失效；建议导入自己的 M3U
 
 **English**
@@ -406,6 +412,7 @@ For stricter per-channel checks, use the built-in player or disable “external 
 - External VLC fullscreen usually opens on the primary monitor; multi-monitor setups may need manual window movement
 - Ad guard covers pre-launch checks (URL + manifests) only; requests made during playback do not pass through the launcher—see the previous section
 - If OpenGL 2.1 is unavailable, the egui window may fail to start
+- Built-in playback defaults to D3D11 rendering; actual hardware decoding depends on the GPU/driver and may fall back to software decoding on old drivers
 - The 104 bundled channels come from the original Android project and may age; importing your own M3U is recommended
 
 ---
@@ -418,6 +425,7 @@ For stricter per-channel checks, use the built-in player or disable “external 
 - 原 Android 工程与网页版源码保留在 `android/`、`web-source/`，方便对照
 - 新增的 Rust 代码以 MIT 许可发布（见 `LICENSE-RUST`）；内置频道数据与字体遵循原项目/字体许可
 - 发布包内的 mpv 为 GPLv2+ 第三方程序，来源与许可见 `packaging/windows/MPV-NOTICE.txt` 和 `MPV-GPL-2.0.txt`
+- 发布包内的 Vulkan Loader 来自 LunarG/Khronos，使用 MIT / Apache 2.0；来源、版本和 SHA-256 见 `packaging/windows/VULKAN-NOTICE.txt`，许可见 `VULKAN-RUNTIME-LICENSE.txt`
 
 **English**
 - `assets/channels.json` comes from the original Android project
@@ -425,6 +433,7 @@ For stricter per-channel checks, use the built-in player or disable “external 
 - The original Android project and web source remain in `android/` and `web-source/` for reference
 - The new Rust code is released under MIT (see `LICENSE-RUST`); bundled channel data and fonts follow their original project/font licenses
 - The bundled mpv runtime is GPLv2+ third-party software; see `packaging/windows/MPV-NOTICE.txt` and `MPV-GPL-2.0.txt`
+- The bundled Vulkan Loader comes from LunarG/Khronos under MIT / Apache 2.0; see `packaging/windows/VULKAN-NOTICE.txt` for version/SHA-256 and `VULKAN-RUNTIME-LICENSE.txt` for the license
 
 ---
 

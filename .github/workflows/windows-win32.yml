@@ -17,6 +17,12 @@ env:
   # 内置播放器运行时：shinchiro 的 32 位 mpv 构建（固定版本便于复现）。
   MPV_URL: https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261101/mpv-i686-20261101-git-48fca90e8c.7z
   MPV_SHA256: dfd73fe3c71ccef2719322ca12d712e5efcfd889e8491f45f3c6791f202bf921
+  # mpv.exe 硬导入 vulkan-1.dll；随包附带官方 LunarG Vulkan Runtime 1.4.363.0 x86。
+  VULKAN_RT_VERSION: 1.4.363.0
+  VULKAN_RT_URL: https://sdk.lunarg.com/sdk/download/1.4.363.0/windows/vulkan-runtime-components.zip
+  VULKAN_RT_SHA256: a25a927aa8b9f0371048f1861cf88ac3b9bc9b1fb332c42d897c8ab32695769a
+  VULKAN_RT_DLL_SHA256: 70d8ee2377ccdab55ad1aa383c27ae0d98a5f0e1e3fcf5a8d4ae3867d729abad
+  VULKAN_RT_LICENSE_SHA256: 404deb98dabf3e54bf9070d59676b31d69a3da2f9f6e56bdf09ad315c04c718c
 
 jobs:
   build:
@@ -41,6 +47,9 @@ jobs:
         run: cargo test --locked --target $env:TARGET
 
       - name: Build release binary
+        env:
+          # 静态 CRT，发布包不需要用户另装 VC++ Redistributable。
+          CARGO_TARGET_I686_PC_WINDOWS_MSVC_RUSTFLAGS: "-C target-feature=+crt-static"
         run: cargo build --locked --release --target $env:TARGET
 
       - name: Prepare zip package
@@ -53,6 +62,8 @@ jobs:
           Copy-Item "packaging/windows/config.toml" "$packageRoot/config.toml"
           Copy-Item "packaging/windows/MPV-NOTICE.txt" "$packageRoot/MPV-NOTICE.txt"
           Copy-Item "packaging/windows/MPV-GPL-2.0.txt" "$packageRoot/MPV-GPL-2.0.txt"
+          Copy-Item "packaging/windows/VULKAN-NOTICE.txt" "$packageRoot/VULKAN-NOTICE.txt"
+          Copy-Item "packaging/windows/VULKAN-RUNTIME-LICENSE.txt" "$packageRoot/VULKAN-RUNTIME-LICENSE.txt"
           Copy-Item "README.md" "$packageRoot/README.md"
           Copy-Item "LICENSE-RUST" "$packageRoot/LICENSE-RUST"
           Copy-Item "snap-*.png" "$packageRoot/"
@@ -75,7 +86,237 @@ jobs:
             throw "failed to extract mpv runtime"
           }
 
+          # 下载官方 LunarG Vulkan Runtime Components，只取 x86 vulkan-1.dll。
+          # mpv.exe 硬导入该 DLL；不能用 --gpu-api=d3d11 规避加载器错误。
+          $vulkanArchive = Join-Path $env:RUNNER_TEMP "vulkan-runtime.zip"
+          Invoke-WebRequest -Uri $env:VULKAN_RT_URL -OutFile $vulkanArchive
+          $vulkanHash = (Get-FileHash -Algorithm SHA256 $vulkanArchive).Hash.ToLower()
+          if ($vulkanHash -ne $env:VULKAN_RT_SHA256) {
+            throw "Vulkan runtime archive checksum mismatch: $vulkanHash"
+          }
+          $vulkanExtract = Join-Path $env:RUNNER_TEMP "vulkan-runtime"
+          Remove-Item -Recurse -Force $vulkanExtract -ErrorAction SilentlyContinue
+          Expand-Archive -Path $vulkanArchive -DestinationPath $vulkanExtract -Force
+          $vulkanDll = Get-ChildItem -Path $vulkanExtract -Recurse -Filter "vulkan-1.dll" |
+            Where-Object { $_.FullName -match '\\x86\\' } |
+            Select-Object -First 1
+          if (!$vulkanDll) {
+            throw "x86 vulkan-1.dll not found in Vulkan runtime archive"
+          }
+          $vulkanDllHash = (Get-FileHash -Algorithm SHA256 $vulkanDll.FullName).Hash.ToLower()
+          if ($vulkanDllHash -ne $env:VULKAN_RT_DLL_SHA256) {
+            throw "vulkan-1.dll checksum mismatch: $vulkanDllHash"
+          }
+          Copy-Item $vulkanDll.FullName (Join-Path $mpvRoot "vulkan-1.dll")
+
+          $vulkanLicense = Get-ChildItem -Path $vulkanExtract -Recurse -Filter "VulkanRT-License.txt" |
+            Select-Object -First 1
+          if (!$vulkanLicense) {
+            throw "Vulkan runtime license not found"
+          }
+          $licenseHash = (Get-FileHash -Algorithm SHA256 $vulkanLicense.FullName).Hash.ToLower()
+          if ($licenseHash -ne $env:VULKAN_RT_LICENSE_SHA256) {
+            throw "Vulkan runtime license checksum mismatch: $licenseHash"
+          }
+          Copy-Item $vulkanLicense.FullName (Join-Path $packageRoot "VULKAN-RUNTIME-LICENSE.txt")
+
           Compress-Archive -Path $packageRoot -DestinationPath "dist/${env:PACKAGE_NAME}.zip" -Force
+
+      - name: Extract final package for validation
+        shell: pwsh
+        run: |
+          $smokeRoot = Join-Path $env:RUNNER_TEMP "touchiptv-smoke"
+          Remove-Item -Recurse -Force $smokeRoot -ErrorAction SilentlyContinue
+          Expand-Archive -Path "dist/${env:PACKAGE_NAME}.zip" -DestinationPath $smokeRoot -Force
+          $packageDir = Join-Path $smokeRoot "${env:PACKAGE_NAME}"
+          if (!(Test-Path (Join-Path $packageDir "mpv\mpv.exe"))) {
+            throw "mpv.exe missing from final package"
+          }
+          if (!(Test-Path (Join-Path $packageDir "mpv\vulkan-1.dll"))) {
+            throw "vulkan-1.dll missing from final package"
+          }
+          $actual = (Get-FileHash -Algorithm SHA256 (Join-Path $packageDir "mpv\vulkan-1.dll")).Hash.ToLower()
+          if ($actual -ne $env:VULKAN_RT_DLL_SHA256) {
+            throw "packaged vulkan-1.dll checksum mismatch: $actual"
+          }
+          Write-Host "Final package extracted to $packageDir"
+          Write-Host "Packaged vulkan-1.dll SHA-256: $actual"
+
+      - name: Check package DLL dependencies
+        shell: pwsh
+        run: |
+          $packageDir = Join-Path $env:RUNNER_TEMP "touchiptv-smoke\${env:PACKAGE_NAME}"
+          $peFiles = Get-ChildItem -Path $packageDir -Recurse -File |
+            Where-Object { $_.Extension -in @(".exe", ".dll") }
+          if ($peFiles.Count -eq 0) {
+            throw "no PE files found in package"
+          }
+          $packagedNames = @{}
+          foreach ($file in $peFiles) {
+            $packagedNames[$file.Name.ToLowerInvariant()] = $true
+          }
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (!(Test-Path $vswhere)) {
+            throw "vswhere.exe not found"
+          }
+          $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (!$vsPath) {
+            throw "Visual Studio C++ tools not found"
+          }
+          $dumpbin = Get-ChildItem (Join-Path $vsPath "VC\Tools\MSVC") -Directory |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName "bin\Hostx64\x86\dumpbin.exe" } |
+            Where-Object { Test-Path $_ } |
+            Select-Object -First 1
+          if (!$dumpbin) {
+            throw "dumpbin.exe not found"
+          }
+          $env:PATH = "$(Split-Path $dumpbin);$env:PATH"
+
+          $redistributables = @(
+            "vcruntime140.dll",
+            "vcruntime140_1.dll",
+            "msvcp140.dll",
+            "concrt140.dll",
+            "vccorlib140.dll"
+          )
+          $missing = @()
+          foreach ($file in $peFiles) {
+            $output = & $dumpbin /nologo /dependents $file.FullName 2>&1
+            if ($LASTEXITCODE -ne 0) {
+              throw "dumpbin failed for $($file.FullName):`n$($output -join "`n")"
+            }
+            $deps = [regex]::Matches(($output -join "`n"), '(?im)^\s+([A-Za-z0-9_.-]+\.dll)\s*$') |
+              ForEach-Object { $_.Groups[1].Value } |
+              Sort-Object -Unique
+            foreach ($dep in $deps) {
+              $lower = $dep.ToLowerInvariant()
+              if ($lower.StartsWith("api-ms-win-") -or $lower.StartsWith("ext-ms-")) {
+                continue
+              }
+              if ($packagedNames.ContainsKey($lower)) {
+                continue
+              }
+              if ($redistributables -contains $lower) {
+                $missing += "$($file.Name) -> $dep (redistributable, not packaged)"
+                continue
+              }
+              $system32 = Join-Path $env:WINDIR "System32\$dep"
+              $syswow64 = Join-Path $env:WINDIR "SysWOW64\$dep"
+              if ((Test-Path $system32) -or (Test-Path $syswow64)) {
+                continue
+              }
+              $missing += "$($file.Name) -> $dep"
+            }
+            Write-Host ("{0}: {1}" -f $file.Name, ($deps -join ", "))
+          }
+          if ($missing.Count -gt 0) {
+            throw "Missing non-system dependencies:`n$($missing -join "`n")"
+          }
+          Write-Host "All non-system DLL dependencies are packaged or are Windows system components."
+
+      - name: Run mpv startup and playback smoke tests
+        shell: pwsh
+        run: |
+          $packageDir = Join-Path $env:RUNNER_TEMP "touchiptv-smoke\${env:PACKAGE_NAME}"
+          $mpvDir = Join-Path $packageDir "mpv"
+          $mpv = Join-Path $mpvDir "mpv.exe"
+          $vulkan = Join-Path $mpvDir "vulkan-1.dll"
+          $video = Join-Path $env:GITHUB_WORKSPACE "packaging\windows\smoke-test.mp4"
+          if (!(Test-Path $mpv)) { throw "mpv.exe missing" }
+          if (!(Test-Path $vulkan)) { throw "vulkan-1.dll missing next to mpv.exe" }
+          if (!(Test-Path $video)) { throw "smoke-test.mp4 missing" }
+
+          function Invoke-PackageMpv {
+            param(
+              [string[]]$MpvArgs,
+              [int]$TimeoutMs = 60000
+            )
+            $psi = [System.Diagnostics.ProcessStartInfo]::new()
+            $psi.FileName = $mpv
+            $psi.WorkingDirectory = $mpvDir
+            $psi.UseShellExecute = $false
+            $psi.RedirectStandardOutput = $true
+            $psi.RedirectStandardError = $true
+            foreach ($arg in $MpvArgs) {
+              $psi.ArgumentList.Add($arg)
+            }
+            $process = [System.Diagnostics.Process]::new()
+            $process.StartInfo = $psi
+            if (-not $process.Start()) {
+              throw "failed to start $mpv"
+            }
+            $stdout = $process.StandardOutput.ReadToEndAsync()
+            $stderr = $process.StandardError.ReadToEndAsync()
+            if (-not $process.WaitForExit($TimeoutMs)) {
+              try { $process.Kill($true) } catch { try { $process.Kill() } catch {} }
+              throw "mpv timed out after ${TimeoutMs}ms: $($MpvArgs -join ' ')"
+            }
+            return [pscustomobject]@{
+              ExitCode = $process.ExitCode
+              StdOut = $stdout.Result
+              StdErr = $stderr.Result
+            }
+          }
+
+          # 只用系统目录 + 包内 mpv 目录；不依赖 runner 碰巧安装的 Vulkan Runtime。
+          $oldPath = $env:PATH
+          $env:PATH = "$env:WINDIR\System32;$env:WINDIR"
+          try {
+            $version = Invoke-PackageMpv @("--no-config", "--version") -TimeoutMs 30000
+            if ($version.ExitCode -ne 0) {
+              throw "mpv --version failed with exit code $($version.ExitCode):`n$($version.StdOut)`n$($version.StdErr)"
+            }
+            Write-Host "mpv --version exit code: 0"
+            Write-Host (($version.StdOut -split "`r?`n" | Select-Object -First 4) -join "`n")
+
+            $gpu = Invoke-PackageMpv @("--no-config", "--gpu-api=help") -TimeoutMs 30000
+            $gpuText = $gpu.StdOut + "`n" + $gpu.StdErr
+            if ($gpu.ExitCode -ne 0 -or $gpuText -notmatch "d3d11") {
+              throw "bundled mpv does not advertise D3D11 GPU API:`n$gpuText"
+            }
+            $context = Invoke-PackageMpv @("--no-config", "--gpu-context=help") -TimeoutMs 30000
+            $contextText = $context.StdOut + "`n" + $context.StdErr
+            if ($context.ExitCode -ne 0 -or $contextText -notmatch "d3d11") {
+              throw "bundled mpv does not advertise D3D11 GPU context:`n$contextText"
+            }
+            $hwdec = Invoke-PackageMpv @("--no-config", "--hwdec=help") -TimeoutMs 30000
+            $hwdecText = $hwdec.StdOut + "`n" + $hwdec.StdErr
+            if ($hwdec.ExitCode -ne 0 -or $hwdecText -notmatch "d3d11va") {
+              throw "bundled mpv does not advertise d3d11va hardware decoding:`n$hwdecText"
+            }
+            Write-Host "Bundled mpv advertises d3d11, d3d11 context and d3d11va."
+
+            $play = Invoke-PackageMpv @(
+              "--no-config", "--no-terminal",
+              "--vo=gpu", "--gpu-api=d3d11", "--gpu-context=d3d11",
+              "--hwdec=auto-safe", "--frames=10", "--no-audio",
+              "--really-quiet", $video
+            ) -TimeoutMs 90000
+            if ($play.ExitCode -ne 0) {
+              throw "D3D11 playback failed with exit code $($play.ExitCode):`n$($play.StdOut)`n$($play.StdErr)"
+            }
+            Write-Host "D3D11 playback of local smoke-test.mp4 passed."
+
+            # 硬解是设备能力相关：runner 上可能只有 WARP，失败只记录，不阻断发布。
+            try {
+              $hw = Invoke-PackageMpv @(
+                "--no-config", "--no-terminal",
+                "--vo=null", "--ao=null", "--hwdec=d3d11va",
+                "--frames=5", "--no-audio", "--really-quiet", $video
+              ) -TimeoutMs 60000
+              if ($hw.ExitCode -eq 0) {
+                Write-Host "d3d11va hardware decode probe passed on this runner."
+              } else {
+                Write-Warning "d3d11va hardware decode unavailable on runner (exit $($hw.ExitCode)); option presence was verified."
+              }
+            } catch {
+              Write-Warning "d3d11va hardware decode probe unavailable on runner: $_"
+            }
+          } finally {
+            $env:PATH = $oldPath
+          }
 
       - name: Upload Win32 zip artifact
         uses: actions/upload-artifact@v6
